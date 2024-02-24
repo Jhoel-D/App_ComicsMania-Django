@@ -1,0 +1,117 @@
+{% extends 'layouts/base.html' %} 
+
+
+{% block content %}
+
+<main class="container">
+    <div class="row">
+        <div class="col-md-4 offset-md-4 mt-5">
+            <form action="/signup/" method="POST" class="card card-body">
+                <h1 class="text-center">Signup</h1>
+
+               <!-- 
+                 {% if errors %}
+                <div class="alert alert-danger">
+                    <ul>
+                        {% for error in errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                -->
+                {% csrf_token %}
+                <!-- Crear Formulario Login -->
+                <div class="mb-3">
+                    <label for="username">
+                    <input type="text" name="username" id="username" class="form-control" placeholder="Write your username">
+                    <!-- Error en username -->
+                    {% if errors.username %}
+                    <div class="text-danger">
+                        {% for error in errors.username %}
+                            <small>{{ error }}</small><br>
+                        {% endfor %}
+                   </div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    <label for="full_name">Full Name:</label>
+                    <input type="text" name="full_name" id="full_name" class="form-control" placeholder="Enter your full name">
+                    <!-- Error fullname -->
+                    {% if errors.full_name %}
+                    <div class="text-danger">
+                        {% for error in errors.full_name %}
+                          <small>{{ error }}</small><br>
+                        {% endfor %}
+                    </div>
+                     {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    <label for="email">Email:</label>
+                    <input type="email" name="email" id="email" class="form-control" placeholder="Enter your email address">
+                    {% if errors.email %}
+                    <div class="text-danger">
+                        {% for error in errors.email %}
+                          <small>{{ error }}</small><br>
+                        {% endfor %}
+                    </div>
+                     {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    <label for="password">
+                        Password: 
+                    </label>
+                    <input type="password" name="password1" id="password1" class="form-control" placeholder="Write your password">
+                    {% if errors.password1 %}
+                    <div class="text-danger">
+                        {% for error in errors.password1 %}
+                          <small>{{ error }}</small><br>
+                        {% endfor %}
+                    </div>
+                     {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    <label for="password2">
+                        Confirm your password: 
+                    </label>
+                    <input type="password" name="password2" id="password2" class="form-control" placeholder="Confirm your password">
+                    {% if errors.password2 %}
+                    <div class="text-danger">
+                        {% for error in errors.password2 %}
+                          <small>{{ error }}</small><br>
+                        {% endfor %}
+                    </div>
+                     {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    <label for="birth_date">Birth Date:</label>
+                    <input type="date" name="birth_date" id="birth_date" class="form-control">
+                    {% if errors.birth_date%}
+                    <div class="text-danger">
+                        {% for error in errors.birth_date %}
+                          <small>{{ error }}</small><br>
+                        {% endfor %}
+                    </div>
+                     {% endif %}
+                </div>
+                <button class="btn btn-primary">
+                    Signup
+                </button>
+            </form>
+            <!-- Validaciones extra, usario exsistente, contraseñas no iguales etc-->
+            {% if messages %}
+                {% for message in messages %}
+                 <div class="alert alert-success" role="alert">
+                    {{ message }}
+                 </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+</main>
+{% endblock %}

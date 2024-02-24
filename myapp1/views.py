@@ -1,0 +1,497 @@
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.forms import CustomUserCreationForm, AuthenticationForm #Añadido
+from django.contrib.auth import login, logout, authenticate
+from django.db import IntegrityError, transaction
+from .forms import TaskForm, CommentForm
+from .models import Task, ComicsMangas,Rating, Comments, CartItem, Order
+from django.utils import timezone
+from django.contrib.auth.decorators import login_required
+
+from django.views.decorators.http import require_POST, require_http_methods
+
+from django.http import JsonResponse
+from django.contrib import messages
+
+def home(request):
+    return render(request, 'home.html')
+
+def cart_total(request):
+    if request.user.is_authenticated:
+        cart_items = CartItem.objects.filter(user=request.user)
+        cart_total = sum(item.comic.price_bs * item.quantity for item in cart_items)
+    else:
+        cart_total = 0
+    
+    return {'cart_total': cart_total}
+
+#Login nuevo
+# Vista para el formulario de registro
+def signup_new(request):
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            if form.cleaned_data['password1'] == form.cleaned_data['password2']:
+                try:
+                    user = form.save(commit=False)
+                    user.full_name = form.cleaned_data['full_name']
+                    user.birth_date = form.cleaned_data['birth_date']
+                    user.save()
+                    #login(request, user)
+                    return redirect('signin_new')
+                except IntegrityError:
+                    return render(request, 'signup_new.html', {'form': form, 'error': 'User already exists'})
+            else:
+                return render(request, 'signup_new.html', {'form': form, 'error': 'Passwords do not match'})
+    else:
+        form = CustomUserCreationForm()
+    return render(request, 'signup_new.html', {'form': form})
+
+
+# Vista para el formulario de inicio de sesión
+def signin_new(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request, request.POST)
+        if form.is_valid():
+            user = authenticate(username=form.cleaned_data['username'], password=form.cleaned_data['password'])
+            if user is not None:
+                login(request, user)
+                return redirect('comics_mangas')
+        else:
+            error_message = "Username or password is incorrect"
+            return render(request, 'signin_new.html', {'form': form, 'error_message': error_message})
+    else:
+        form = AuthenticationForm()
+    return render(request, 'signin_new.html', {'form': form})
+
+# Login de formulario
+def signup(request): 
+    if request.method == 'GET':
+        form = CustomUserCreationForm()  # Crea una instancia del formulario sin datos del usuario
+        return render(request, 'signup.html', {'form': form})
+    else: 
+        form = CustomUserCreationForm(request.POST)  # Crea una instancia del formulario con los datos del usuario
+        if form.is_valid():  # Verifica si el formulario es válido
+            if form.cleaned_data['password1'] == form.cleaned_data['password2']:  # Verifica si las contraseñas coinciden
+                try:
+                    # Registra el usuario
+                    user = form.save(commit=False)  # Guarda el usuario pero no lo persiste en la base de datos aún
+                    user.full_name = form.cleaned_data['full_name']  # Asigna el nombre completo del formulario al usuario
+                    user.birth_date = form.cleaned_data['birth_date']  # Asigna la fecha de nacimiento del formulario al usuario
+                    user.save()  # Ahora sí guarda el usuario con los campos adicionales
+                    login(request, user)
+                    #messages.success(request, '¡Usuario registrado correctamente! Bienvenido a nuestra plataforma.')
+                    return redirect('tasks')
+                except IntegrityError:
+                    #messages.success(request, 'User already exists')
+                    return render(request, 'signup.html', {
+                        'form': form,
+                        "error": 'User already exists'})
+            else:
+                return render(request, 'signup.html', {
+                    'form': form,
+                    'error': 'Passwords do not match'})
+        else:
+          # Si hay errores de validación, los pasamos al contexto para mostrarlos en la plantill
+          errors = form.errors.as_data()  # Obtener los errores del formulario
+          error_messages = []  # Lista para almacenar los mensajes de error
+          for field, field_errors in errors.items():  # Iterar sobre los errores de cada campo
+              for error in field_errors:  # Iterar sobre los errores asociados con cada campo
+                  error_messages.append(f"{field}: {error}")  # Agregar cada mensaje de error a la lista
+        #return render(request, 'signup.html', {'form': form, 'errors': error_messages, 'success_message': '¡Usuario registrado correctamente! Bienvenido a nuestra plataforma.'})
+
+        return render(request, 'signup.html', {'form': form, 'errors': form.errors})
+    
+# Iniciar Sesión
+def signin (request):
+    if request.method == 'GET':
+        return render(request, 'signin.html',{
+            'form': AuthenticationForm()})
+    else: 
+        user = authenticate(
+            request,
+            username=request.POST['username'],
+            password=request.POST['password'])
+        if user is None:
+            return render(request, 'signin.html',{
+            'form': AuthenticationForm,
+            'error': 'Username or password is incorrect'
+            })
+        else: 
+            
+            login(request, user)
+            return redirect('tasks')  
+        
+
+# Index de la pagina de tareas o comics 
+@login_required  
+def tasks(request):
+    tasks = Task.objects.filter(User=request.user, datecompleted__isnull = True) #Devuelve los registros del modelo Task
+    return render(request, 'task.html', {'tasks': tasks})
+
+# Index de la pagina de tareas completadas 
+@login_required 
+def tasks_completed(request):
+    tasks = Task.objects.filter(User=request.user, datecompleted__isnull = False).order_by('-datecompleted') #Devuelve los registros del modelo Task
+    return render(request, 'task.html', {'tasks': tasks})
+
+# Logout o Cerrar Sesión
+@login_required
+def signout (request):
+    logout(request)
+    return redirect ('home')
+
+        
+
+# Crear Tareas
+@login_required
+def create_task (request):
+    if request.method == 'GET':
+        return render(request, 'create_task.html',{
+            'form': TaskForm
+        })
+    else:
+        try:
+            form= TaskForm(request.POST)
+            new_task = form.save(commit=False)
+            new_task.User = request.user
+            new_task.save()
+            return redirect('tasks')
+        except ValueError:
+            return render(request, 'create_task.html',{
+            'form': TaskForm,
+            'error': 'Please provide valida data'
+        })
+            
+        return render(request, 'task.html',{
+            'form': TaskForm
+            })
+    
+# Mostrar detalles de tarea
+@login_required    
+def task_detail (request, task_id):
+    if request.method == 'GET':
+        task = get_object_or_404(Task, pk=task_id, User=request.user)
+        form= TaskForm(instance=task)
+        return render(request, 'task_detail.html',{'tasks': task, 'form': form})
+    else:
+        try:
+            task = get_object_or_404(Task, pk=task_id, User=request.user)
+            form=TaskForm(request.POST, instance=task)
+            form.save()
+            return redirect('tasks')
+        except ValueError:
+            return render(request, 'task_detail.html',{'tasks': task, 'form': form, 'error': 'Error updating task'})      
+
+# Poner dato como hecho
+@login_required     
+def complete_task(request, task_id):
+    task= get_object_or_404(Task, pk=task_id, User=request.user)
+    if request.method == 'POST':
+        task.datecompleted = timezone.now()
+        task.save()
+        return redirect('tasks') 
+
+#Borrar tarea
+@login_required   
+def delete_task(request, task_id):
+    task= get_object_or_404(Task, pk=task_id, User=request.user)
+    if request.method == 'POST':
+        task.delete()
+        return redirect('tasks')
+
+
+
+# Nuevo login y registro
+
+from django.contrib.auth.models import User
+
+
+def signin_signup(request):
+    if request.method == 'POST':
+        if 'register' in request.POST:
+            form = CustomUserCreationForm(request.POST)
+            if form.is_valid():
+                if form.cleaned_data['password1'] == form.cleaned_data['password2']:
+                    try:
+                        user = form.save(commit=False)
+                        user.full_name = form.cleaned_data['full_name']
+                        user.birth_date = form.cleaned_data['birth_date']
+                        user.save()
+                        login(request, user)
+                        return redirect('home')
+                    except IntegrityError:
+                        error_message = 'El nombre de usuario ya está en uso. Por favor, elige otro.'
+                        return render(request, 'signin_signup.html', {'form': form, 'error_message': error_message})
+                else:
+                    error_message = 'Las contraseñas no coinciden.'
+                    return render(request, 'signin_signup.html', {'form': form, 'error_message': error_message})
+            else:
+                error_message = 'Por favor, corrige los errores del formulario.'
+                return render(request, 'signin_signup.html', {'form': form, 'error_message': error_message})
+        elif 'login' in request.POST:
+            username = request.POST.get('username')
+            password = request.POST.get('password')
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('home')
+            else:
+                error_message = 'El nombre de usuario o la contraseña son incorrectos. Por favor, inténtalo de nuevo.'
+                return render(request, 'signin_signup.html', {'error_message': error_message})
+                
+    else:
+        form = CustomUserCreationForm()
+        return render(request, 'signin_signup.html', {'form': form})
+    
+
+#Carrito
+@login_required 
+def add_to_cart(request):
+    return render(request, 'add_to_cart.html')
+
+def comics_mangas(request):
+    comics_mangas = ComicsMangas.objects.all()
+    if request.user.is_authenticated:
+        cart_item_ids = request.user.cartitem_set.values_list('comic_id', flat=True)
+    else:
+        cart_item_ids = []  # Si el usuario no está autenticado, establecer cart_item_ids como una lista vacía
+
+    return render(request, 'comics_mangas.html', {'comics_mangas': comics_mangas, 'cart_item_ids': cart_item_ids})
+
+@login_required
+def comics_mangas_detail(request, comic_manga_id):
+    if request.user.is_authenticated:
+        cart_item_ids = request.user.cartitem_set.values_list('comic_id', flat=True)
+    else:
+        cart_item_ids = []  # Si el usuario no está autenticado, establecer cart_item_ids como una lis
+    comic_manga = get_object_or_404(ComicsMangas, pk=comic_manga_id)
+    user_rating = Rating.objects.filter(user=request.user, product=comic_manga).first()
+    rating_values = [1, 2, 3, 4, 5]
+    comments = Comments.objects.filter(product=comic_manga, approved=True)
+    user_rating_value = user_rating.value if user_rating else None
+    for comment in comments:
+        comment.user_rating = Rating.objects.filter(user=comment.user, product=comic_manga).first()
+
+    context = {
+        'comic_manga': comic_manga,
+        'comments': comments,
+        'user_rating_value': user_rating_value,
+        'rating_values': rating_values,
+        'user_rating': user_rating,
+        'cart_item_ids': cart_item_ids   }
+    return render(request, 'comics_mangas_detail.html', context)
+
+@login_required
+def add_comment(request, comic_manga_id):
+    if request.method == 'POST':
+        comment_text = request.POST.get('comment')
+        comic_manga = get_object_or_404(ComicsMangas, pk=comic_manga_id)
+        # Crea el comentario
+        comment = Comments.objects.create(user=request.user, product=comic_manga, review_comment=comment_text)
+        # Redirection de vuelta a la página de detalle del cómic o manga
+        return redirect('comics_mangas_detail', comic_manga_id=comic_manga_id)
+    # Si no es una solicitud POST, redirige a la página de detalle del cómic o manga
+    return redirect('comics_mangas_detail', comic_manga_id=comic_manga_id)
+
+def load_more_comments(request, comic_manga_id):
+    next_index = int(request.GET.get('next_index', 0))
+    comic_manga = get_object_or_404(ComicsMangas, pk=comic_manga_id)
+    
+    # Obtener solo los comentarios aprobados relacionados con el cómic o manga
+    comments = Comments.objects.filter(product=comic_manga, approved=True)[next_index:next_index+4]
+    
+    # Obtener las calificaciones para cada comentario
+    comments_data = []
+    for comment in comments:
+        user_rating = Rating.objects.filter(user=comment.user, product=comic_manga).first()
+        comment_data = {
+            'publication_date': comment.publication_date.strftime('%Y-%m-%d %H:%M:%S'),
+            'user': comment.user.username,
+            'review_comment': comment.review_comment,
+            'user_rating_value': user_rating.value if user_rating else None,
+        }
+        comments_data.append(comment_data)
+    
+    return JsonResponse({'comments': comments_data})
+
+
+@login_required
+def submit_rating(request, comic_manga_id):
+    if request.method == 'POST':
+        rating_value = int(request.POST.get('rating'))
+        if rating_value >= 1 and rating_value <= 5:
+            comic_manga = get_object_or_404(ComicsMangas, pk=comic_manga_id)
+            # Buscar si ya existe una calificación del usuario para este producto
+            existing_rating = Rating.objects.filter(user=request.user, product=comic_manga).first()
+            if existing_rating:
+                # Si ya existe una calificación, actualizarla
+                existing_rating.value = rating_value
+                existing_rating.save()
+            else:
+                # Si no existe una calificación, crear una nueva
+                Rating.objects.create(user=request.user, product=comic_manga, value=rating_value)
+            # Redirigir de vuelta a la página de detalle del cómic o manga
+            return redirect('comics_mangas_detail', comic_manga_id=comic_manga_id)
+    # En caso de que la solicitud no sea POST o la calificación sea inválida, redirigir a la página de inicio
+    return redirect('comics_mangas_detail', comic_manga_id=comic_manga_id)
+
+
+
+#Carrito Producto
+@login_required
+def cart_view(request):
+    cart_items = CartItem.objects.filter(user=request.user)
+    total_price = sum(item.comic.price_bs * item.quantity for item in cart_items)
+    
+    total_products = sum(item.quantity for item in cart_items)
+    
+    return render(request, 'cart.html', {'cart_items': cart_items, 'total_price': total_price, 'total_products': total_products})
+
+@login_required
+@transaction.atomic
+def add_to_cart_inline(request, product_id):
+    # Verificar si el usuario está autenticado
+    if not request.user.is_authenticated:
+        return JsonResponse({'success': False, 'error': 'Debe iniciar sesión para agregar productos al carrito'})
+    # Obtener el producto
+    product = get_object_or_404(ComicsMangas, pk=product_id)
+    # Verificar si el producto está en stock
+    if product.stock <= 0:
+        return JsonResponse({'success': False, 'error': 'Producto agotado'})
+    # Verificar si el producto ya está en el carrito
+    cart_item, created = CartItem.objects.get_or_create(user=request.user, comic=product)
+
+    if not created:
+        # Si el objeto ya existe en el carrito, verificar si hay suficiente stock
+        if cart_item.quantity >= product.stock:
+            return JsonResponse({'success': False, 'error': 'No hay suficiente stock disponible'})
+        else:
+            # Incrementar la cantidad en el carrito y reducir el stock del producto
+            cart_item.quantity += 1
+            product.stock -= 1
+    else:
+        # Si el objeto es nuevo en el carrito, la cantidad será 1
+        cart_item.quantity = 1
+        product.stock -= 1
+    # Guardar los cambios en el producto y el carrito
+    product.save()
+    cart_item.save()
+    # Calcular el nuevo precio total de la orden
+    order_total_price = sum(item.comic.price_bs * item.quantity for item in request.user.cartitem_set.all())
+    # Indicar que el producto se agregó correctamente al carrito
+    return JsonResponse({'success': True, 'message': 'Producto agregado al carrito', 'order_total_price': order_total_price})
+
+@login_required
+@require_http_methods(["DELETE"])
+def remove_from_cart(request, item_id):
+    try:
+        cart_item = CartItem.objects.get(pk=item_id, user=request.user)
+        # Incrementar el stock del producto al eliminar el elemento del carrito
+        cart_item.comic.stock += cart_item.quantity
+        cart_item.comic.save()
+        cart_item.delete()
+        
+        # Obtener la cantidad total de elementos en el carrito
+        cart_items = CartItem.objects.filter(user=request.user)
+        cart_item_count = cart_items.count()
+        
+        # Obtener el precio total actualizado de la orden
+        order_total_price = sum(item.comic.price_bs * item.quantity for item in cart_items)
+        
+        # Calcular la cantidad total de productos en el carrito
+        total_products = sum(item.quantity for item in cart_items)
+        
+        return JsonResponse({'success': True, 'message': 'Producto eliminado del carrito correctamente', 'cart_item_count': cart_item_count, 'order_total_price': order_total_price, 'total_products': total_products})
+    except CartItem.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'El producto no existe en el carrito'})
+
+
+@login_required
+@require_POST
+def increase_quantity(request, item_id):
+    try:
+        cart_item = CartItem.objects.get(pk=item_id, user=request.user)
+        # Verificar si hay suficiente stock disponible antes de aumentar la cantidad
+        if cart_item.comic.stock > 0:
+            cart_item.quantity += 1
+            cart_item.comic.stock -= 1
+            cart_item.comic.save()
+            cart_item.save()
+            
+            # Obtener la cantidad total de elementos en el carrito
+            cart_item_count = request.user.cartitem_set.count()
+            
+            # Obtener el precio total actualizado de la orden
+            order_total_price = sum(item.comic.price_bs * item.quantity for item in request.user.cartitem_set.all())
+            
+            # Calcular la cantidad total de productos en el carrito
+            total_products = sum(item.quantity for item in request.user.cartitem_set.all())
+            
+            return JsonResponse({'success': True, 'message': 'Cantidad aumentada en el carrito', 'quantity': cart_item.quantity, 'order_total_price': order_total_price, 'cart_item_count': cart_item_count, 'total_products': total_products})
+        else:
+            return JsonResponse({'success': False, 'error': 'No hay suficiente stock disponible'})
+    except CartItem.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'El producto no existe en el carrito'})
+    
+
+@login_required
+@require_POST
+def decrease_quantity(request, item_id):
+    try:
+        cart_item = CartItem.objects.get(pk=item_id, user=request.user)
+        if cart_item.quantity > 1:
+            cart_item.quantity -= 1
+            cart_item.comic.stock += 1
+            cart_item.comic.save()
+            cart_item.save()
+        else:
+            # Si la cantidad es 1, eliminar el elemento del carrito y devolver el stock al producto
+            cart_item.comic.stock += 1
+            cart_item.comic.save()
+        ###cart_item.delete()
+        
+        # Obtener el precio total actualizado de la orden
+        order_total_price = sum(item.comic.price_bs * item.quantity for item in request.user.cartitem_set.all())
+        
+        # Calcular la cantidad total de elementos en el carrito
+        cart_item_count = request.user.cartitem_set.count()
+        
+        # Calcular la cantidad total de productos en el carrito
+        total_products = sum(item.quantity for item in request.user.cartitem_set.all())
+        
+        return JsonResponse({'success': True, 'message': 'Cantidad disminuida en el carrito', 'quantity': cart_item.quantity if hasattr(cart_item, 'quantity') else 0, 'order_total_price': order_total_price, 'cart_item_count': cart_item_count, 'total_products': total_products})
+    except CartItem.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'El producto no existe en el carrito'})
+
+
+@login_required
+@require_POST
+def clear_cart(request):
+    try:
+        # Obtener los elementos del carrito del usuario actual
+        cart_items = CartItem.objects.filter(user=request.user)
+        
+        # Iterar sobre los elementos del carrito y devolver el stock de cada producto
+        for cart_item in cart_items:
+            cart_item.comic.stock += cart_item.quantity
+            cart_item.comic.save()
+        
+        # Eliminar todos los elementos del carrito del usuario actual
+        cart_items.delete()
+        
+        # Obtener la cantidad total de elementos en el carrito (que ahora será 0)
+        cart_item_count = 0
+        
+        # Precio total de la orden (que ahora será 0)
+        order_total_price = 0
+        
+        # Calcular la cantidad total de productos en el carrito
+        total_products = 0
+        
+        return JsonResponse({'success': True, 'message': 'Carrito vaciado correctamente', 'cart_item_count': cart_item_count, 'order_total_price': order_total_price, 'total_products': total_products})
+    except CartItem.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Error al vaciar el carrito'})
+    
+
+def cart_pay(request):
+    return render(request, 'cart_pay.html')

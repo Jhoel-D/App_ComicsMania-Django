@@ -1,0 +1,259 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"/>
+<link rel="stylesheet" href="{% static 'css/comics_mangas.css' %}" />
+
+
+
+  <div class="container">
+    <div class="px-4 py-5 bg-dark text-white">
+      <h2 class="font-semibold is-size-3"> {{ comic_manga.title }} </h2>
+      <h1 class="font-bold text-2xl"> Manga </h1>
+      <img class="card-img-top fixed-height-img mx-auto d-block" src="{{ comic_manga.cover_img.url }}" alt="{{ comic_manga.title }}" style="width: 50%; max-width: 100%; height: auto;">
+      <p class="text-muted has-text-white">by: {{ comic_manga.author }}</p>
+    </div>
+    
+    <div class="px-4 py-5 has-background-dark">
+      <h2 class="font-semibold has-text-white is-size-3">Synopsis</h2>
+      <p class="has-text-white">
+        {{ comic_manga.synopsis }}
+      </p>
+    </div>
+    
+    <div class="px-4 py-5">
+      <h2 class="font-semibold has-text-white is-size-4">Details:</h2>
+      <div class="row">
+        <div class="col-md-6">
+          <p class="font-medium has-text-white">Publication date: {{ comic_manga.year_of_release|date:'M j, Y' }}</p>
+        </div>
+        <div class="col-md-6">
+          <p class="font-medium has-text-white">Pages: {{ comic_manga.pages }}</p>
+        </div>
+        <div class="col-md-6">
+          <p class="font-medium has-text-white">Author(es): {{ comic_manga.author }}</p>
+        </div>
+        <div class="col-md-6">
+          <p class="font-medium has-text-white">Publisher: {{ comic_manga.publisher }}</p>
+        </div>
+        <div class="col-md-6">
+          <p class="font-medium has-text-white">Price: {{ comic_manga.price_bs }} Bs</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="px-4 py-5">
+      <div class="row">
+        <div class="col-md-6">
+          {% if comic_manga.stock > 0 %}
+                <!-- Verificar si el producto está en el carrito -->
+                {% if comic_manga.id in cart_item_ids %}
+                    <button class="button is-dark" disabled>
+                        <span class="is-small"><i class="fa fa-cart-plus"></i></span>
+                        <span>Añadido</span>
+                    </button>
+                {% else %}
+                    <button id="add-to-cart-btn-{{ comic_manga.id }}" class="button is-dark add-to-cart-btn" onclick="addToCart('{{ comic_manga.id }}', this)">
+                        <span class="icon is-small"><i class="fa fa-cart-plus"></i></span>
+                        <span>Añadir a carrito</span>
+                    </button>
+                {% endif %}
+            {% else %}
+            <button class="button is-danger is-outlined" disabled>
+                <span class="icon is-small"><i class="fas fa-cart-plus"></i></span>
+                <span>¡AGOTADO!</span>
+            </button>
+            {% endif %}
+
+          <button class="button is-secondary" type="submit">
+            <span class="icon is-small"><i class="fas fa-cart-plus"></i></span>
+            <a href="{% url 'cart_view' %}">¡Ir a carrito!</a>
+            
+          </button>
+        </div>
+        <div class="col-md-6">
+          <button class="button is-light">
+            <span class="icon is-small"><i class="fas fa-heart"></i></span>
+            <span>Add to wishlist</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+
+
+<!-- Sección de calificación del producto -->
+<div class="product-rating">
+
+  <h2 class="subtitle is-4 has-text-light">Product Rating</h2>
+  {% if user_rating %}
+  <p class="has-text-light">User: {{ user_rating.user.username }}</p>
+  <p class="has-text-light">Rating (1-5) : {{ user_rating.value }}</p>
+    {% for _ in rating_values|slice:user_rating.value %}
+       <i class="fas fa-star has-text-warning"></i> <!-- Muestra las estrellas -->
+    {% endfor %}
+  </p>
+  {% else %}
+  <p class="has-text-danger is-size-5">No rating found for this user and product.</p>
+  {% endif %}
+  <hr>
+</div>
+
+  <!-- Formulario para enviar la calificación -->
+  <h2>Ingrese </h2>
+  <form id="rating-form" action="{% url 'submit_rating' comic_manga.id %}" method="post">
+    {% csrf_token %}
+    <div class="field">
+      <div class="control">
+        <select name="rating" class="select"> 
+          <option value="1">&#9733;</option>
+          <option value="2">&#9733;&#9733;</option>
+          <option value="3">&#9733;&#9733;&#9733;</option>
+          <option value="4">&#9733;&#9733;&#9733;&#9733;</option>
+          <option value="5">&#9733;&#9733;&#9733;&#9733;&#9733;</option>
+        </select>
+        <button type="submit" id="submit-rating" class="button is-primary">Submit Rating</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+ <!-- Caja de comentarios -->
+ <div class="px-4 py-5 bg-dark text-light">
+  <h2 class="font-semibold has-text-white is-size-3">Reviews</h2>
+  <div id="comment-container" class="columns is-multiline">
+    {% if comments %}
+      {% for comment in comments|slice:":0" %}
+      <div class="column is-half">
+          <div class="box">
+              <div class="text-muted">Published on: {{ comment.publication_date }}</div>
+              <div class="font-semibold">{{ comment.user.username }}</div>
+              {% if comment.user_rating %}
+              <div class="rating">
+                  {% for _ in rating_values|slice:comment.user_rating.value %}
+                  <i class="fas fa-star text-warning"></i> <!-- Muestra las estrellas -->
+                  {% endfor %}
+              </div>
+              {% else %}
+              <p>Rating: User did not rate this product</p>
+              {% endif %}
+              <p>{{ comment.review_comment }}</p>
+          </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <p>No comments yet.</p>
+    {% endif %}
+  </div>
+  <div id="load-more-container">
+    <button id="load-more-comments" class="button is-primary">Load more comments</button>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const loadMoreButton = document.getElementById("load-more-comments");
+    const commentContainer = document.getElementById("comment-container");
+    let nextIndex = 4; // Índice del siguiente comentario a cargar
+
+    loadMoreButton.addEventListener("click", function() {
+      fetchMoreComments();
+    });
+
+    function fetchMoreComments() {
+      fetch("{% url 'load_more_comments' comic_manga_id=comic_manga.id %}?next_index=" + nextIndex)
+        .then(response => response.json())
+        .then(data => {
+          if (data.comments.length > 0) {
+            data.comments.forEach(comment => {
+              const commentHtml = `
+                <div class="column is-half">
+                  <div class="box">
+                    <div class="text-muted">Published on: ${comment.publication_date}</div>
+                    
+                    <div class="font-semibold">${comment.user}</div>
+                    ${comment.user_rating_value !== null && comment.user_rating_value !== undefined ? 
+                      `<div class="rating">
+                        ${Array(comment.user_rating_value).fill('<i class="fas fa-star text-warning"></i>').join('')}
+                      </div>` : `<p>Rating: User did not rate this product</p>`}
+                    <p>${comment.review_comment}</p>
+                  </div>
+                </div>`;
+              commentContainer.insertAdjacentHTML('beforeend', commentHtml);
+            });
+            nextIndex += data.comments.length; // Actualizar el índice del siguiente comentario a cargar
+          } else {
+            loadMoreButton.style.display = "none"; // Ocultar el botón si no hay más comentarios
+          }
+        })
+        .catch(error => console.error("Error fetching more comments:", error));
+    }
+    fetchMoreComments(); // Llamada inicial para cargar los primeros comentarios
+  });
+</script>
+
+<!-- Contenedor para el mensaje de agregado al carrito -->
+<div id="add-to-cart-message-container"></div>
+
+<script>
+    function addToCart(productId, button) {
+        const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+    
+        fetch("{% url 'add_to_cart_inline' 0 %}".replace('0', productId), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Ocultar el botón de "Añadir a carrito"
+                button.style.display = 'none';
+                // Crear un nuevo botón de "Añadido"
+                const addedButton = document.createElement('button');
+                addedButton.classList.add('button', 'is-dark');
+                addedButton.disabled = true;
+                addedButton.innerHTML = `
+                    <span class="is-small"><i class="fa fa-cart-plus"></i></span>
+                    <span>Añadido</span>
+                `;
+                button.parentNode.appendChild(addedButton);
+            } else {
+                console.error('Error al agregar al carrito:', data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error al agregar al carrito:', error);
+        });
+    }
+    </script>
+<!-- Modal -->
+
+<!-- Adicionar comentario -->
+<div class="box has-background-dark has-text-white">
+  <h2 class="subtitle is-4 has-text-white">Add a Comment</h2>
+  <form method="post" action="{% url 'add_comment' comic_manga.id %}">
+    {% csrf_token %}
+    <div class="field">
+      <div class="control">
+        <textarea class="textarea has-background-black has-text-white" rows="3" placeholder="Write your comment..." name="comment"></textarea>
+      </div>
+    </div>
+    <div class="field">
+      <div class="control">
+        <button type="submit" class="button is-primary">Post comment</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+
+
+
+
+  </div>
+  
+  {% endblock %}
+  

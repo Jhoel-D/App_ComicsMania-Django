@@ -1,0 +1,69 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Inicio de Sesión</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+    <!-- Esta llamando de manera estática con el load static las paginas estáticas css -->
+    <link rel="stylesheet" href="{% static 'css/login_style.css' %}"/>
+    <!-- Agrega un estilo en línea para la imagen de fondo -->
+    <style>
+        body {
+            background-image: url("{% static 'img/fondo_login.png' %}");
+            background-size: cover;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-form login" id="signin-form">
+        <div class="information">
+            <div class="info-childs">
+                <h2>¡Bienvenido, estás por ingresar!</h2>
+                <p>Si aún no tienes una cuenta, regístrate con el siguiente botón:</p>
+                <input type="button" value="Registrarse" id="signup-button">
+                <div>
+                    <input type="button" value="Ir a Home" id="home-button">
+                </div>
+            </div>
+        </div>
+        <div class="form-information">
+            <div class="form-information-childs">
+                <form class="form" action="{% url 'signin_new' %}" method="POST">
+                    {% csrf_token %}
+                    <h2>Iniciar Sesión</h2>
+                    <label for="username">
+                        <i class="bx bx-envelope"></i>
+                        <input type="text" name="username" id="username" class="form-control" placeholder="Write your username">
+                    </label>
+                    <label for="password">
+                        <i class="bx bx-lock-alt"></i>
+                        <input type="password" name="password" id="password" class="form-control" placeholder="Write your password">
+                    </label>
+                    {% if error_message %}
+                    <div class="error-message">
+                        {{ error_message }}
+                    </div>
+                    {% endif %}
+                    <input type="submit" name="login" value="Iniciar Sesión" />
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'js/signin_new.js' %}"></script>
+    <script>
+        document.getElementById("signup-button").addEventListener("click", function() {
+            window.location.href = "{% url 'signup_new' %}";
+        });
+
+        document.getElementById("home-button").addEventListener("click", function() {
+            window.location.href = "{% url 'home' %}";
+        });
+    </script>
+
+</body>
+</html>

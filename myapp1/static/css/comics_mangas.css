@@ -1,0 +1,11 @@
+.fixed-height-img {
+    width: 350px; /* Ancho fijo */
+    height: 500px; /* Altura fija */
+    object-fit: cover; /* Ajusta la imagen dentro del contenedor manteniendo su relación de aspecto */
+}
+
+.comic-manga-item {
+    display: flex;
+    justify-content: center; /* Centra horizontalmente */
+    align-items: center; /* Centra verticalmente */
+}

@@ -1,0 +1,325 @@
+{% extends 'layouts/base.html' %} 
+{% load static %} 
+{% block content %}
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"/>
+
+<main class="container py">
+  <section class="section">
+    <div class="columns is-centered">
+      <div class="column is-three-quarters">
+        {% if user.is_authenticated %}
+        <h1 class="title is-1 has-text-centered">
+          ¡Bienvenido a Fantasy ComicsMania!
+        </h1>
+        {% else %}
+        <h1 class="title is-1 has-text-centered">¡Fantasy ComicsMania!</h1>
+        {% endif %}
+        <p class="subtitle has-text-centered">
+          Explora un mundo de aventuras y emociones en nuestra librería
+          especializada en cómics, mangas y artículos relacionados. Encuentra
+          los últimos lanzamientos, clásicos atemporales y productos
+          coleccionables que harán latir tu corazón de fanático. ¡La aventura
+          comienza en cada página!.
+        </p>
+        <div class="columns is-centered">
+          <div class="text-center">
+            <img
+              src="{% static 'img/log_nav.png' %}"
+              alt="Item-1n"
+              class="is-size-1-desktop is-size-3-mobile c_m_home"
+            />
+            <div>
+              {% if user.is_authenticated %} {% else %}
+              <a class="button is-info is-outlined" href="/signin/">Signin</a>
+              <a class="button is-primary is-outlined" href="/signup/"
+                >Signup</a
+              >
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="row">
+  <!-- Barra de navegación lateral con Bootstrap -->
+  <aside class="menu is-fixed-left col-md-auto">
+    <p class="menu-label">Categorías</p>
+    <ul class="menu-list">
+      <li><a href="#">Mujer</a></li>
+      <li><a href="#">Hombre</a></li>
+      <li><a href="#">Niños</a></li>
+      <!-- Agrega más elementos de menú según sea necesario -->
+    </ul>
+    <p class="menu-label">Opciones</p>
+    <ul class="menu-list">
+      <li><a href="#">Perfil</a></li>
+      <li><a href="#">Configuración</a></li>
+      <li><a href="#">Salir</a></li>
+      <!-- Agrega más elementos de menú según sea necesario -->
+    </ul>
+  </aside>
+  <!-- Banner con Bulma -->
+  <div class="col-md-9">
+    <div class="banner banner-cover">
+      <div class="banner-container">
+        <h1 class="title-cover">AVE</h1>
+        <img
+          src="{% static 'img/banner.png' %}"
+          alt="Item-1n"
+          class="is-fullwidth"
+        />
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Banner -->
+<div class="banner banner-cover">
+  <div class="banner-container">
+    <h1 class="title-cover">¡New!</h1>
+    <a class="btn btn-default">Comics, Mangas y productos referidos</a>
+  </div>
+</div>
+
+<!-- Barra de navegación secundaria -->
+<div class="container">
+  <nav class="nav">
+    <a class="nav-item active has-text-weight-semibold" href="#">Comics</a>
+    <a class="nav-item has-text-weight-semibold" href="#">Mangas</a>
+    <a class="nav-item has-text-weight-semibold" href="#">Más vendidos</a>
+    <a class="nav-item has-text-weight-semibold" href="#">Ofertas</a>
+    <a class="nav-item has-text-weight-semibold" href="#">Muy pronto</a>
+  </nav>
+</div>
+<!-- Sección de fotografías -->
+<div class="container">
+  <div class="columns is-multiline">
+    <div class="column is-full-mobile">
+      <div class="columns is-centered is-mobile is-multiline">
+        <!-- 1 Sección de fotografías -->
+        <div class="column is-half column-full">
+          <div class="card">
+            <span class="price">Bs89.99</span>
+            <a href="#" class="c_m_home">
+                <img src="{% static 'img/item-1n.png' %}" alt="Item-1n" />
+            </a>
+            <div class="card-info">
+              <h4 class="has-text-black has-text-centered has-text-weight-bold">
+                Women's Burnt Orange Casual TEE Bs89.99
+              </h4>
+              <p class="has-text-centered">
+                Classic casual t-shirt for women on the move. 100% cotton.
+              </p>
+              <div class="card-buttons">
+                <a href="#" class="btn btn--mini-rounded"
+                  ><i class="zmdi zmdi-shopping-cart"></i
+                ></a>
+                <a href="#" class="btn btn--mini-rounded"
+                  ><i class="zmdi zmdi-favorite-outline"></i
+                ></a>
+                <a href="producto.html" class="btn btn--mini-rounded"
+                  ><i class="zmdi zmdi-eye"></i
+                ></a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="column column-full is-half">
+          <div class="card">
+            <span class="price">Bs47.50</span>
+            <img src="{% static 'img/item-2n.png' %}" alt="Item-2n" />
+            <div class="card-info">
+              <h4 class="has-text-black has-text-centered has-text-weight-bold">
+                Women's Burnt Orenge Casual TEE Bs47.50
+              </h4>
+              <p class="has-text-centered">
+                Classic casual t-shirt for women on the move. 100% cotton.
+              </p>
+              <div class="card-buttons">
+                <a href="#" class="btn btn--mini-rounded"
+                  ><i class="zmdi zmdi-shopping-cart"></i
+                ></a>
+                <a href="#" class="btn btn--mini-rounded"
+                  ><i class="zmdi zmdi-favorite-outline"></i
+                ></a>
+                <a href="producto.html" class="btn btn--mini-rounded"
+                  ><i class="zmdi zmdi-eye"></i
+                ></a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="column is-full">
+          <div class="card">
+            <span class="price">Bs65.95</span>
+
+            <img src="{% static 'img/item-3n.png' %}" alt="Item-3n" />
+            <div class="card-info">
+              <h4 class="has-text-black has-text-centered has-text-weight-bold">
+                Women's Burnt Orenge Casual TEE Bs65.95
+              </h4>
+              <p class="has-text-centered">
+                Classic casual t-shirt for women on the move. 100% cotton.
+              </p>
+              <div class="card-buttons">
+                <a href="#" class="btn btn--mini-rounded"
+                  ><i class="zmdi zmdi-shopping-cart"></i
+                ></a>
+                <a href="#" class="btn btn--mini-rounded"
+                  ><i class="zmdi zmdi-favorite-outline"></i
+                ></a>
+                <a href="producto.html" class="btn btn--mini-rounded"
+                  ><i class="zmdi zmdi-eye"></i
+                ></a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Segunda sección de fotografías -->
+    <div class="column is-half is-full-mobile">
+      <div class="columns is-mobile is-multiline">
+        <div class="column is-full">
+          <div class="card">
+            <span class="price"><strike>Bs107</strike> Bs89.99</span>
+            <img src="{% static 'img/item-4n.png' %}" alt="Item-4n" />
+            <div class="card-info">
+              <h4 class="has-text-black has-text-centered has-text-weight-bold">
+                Women's Burnt Orenge Casual TEE Bs89.99
+              </h4>
+              <p class="has-text-centered">
+                Classic casual t-shirt for women on the move. 100% cotton.
+              </p>
+              <div class="card-buttons">
+                <a href="#" class="btn btn--mini-rounded"
+                  ><i class="zmdi zmdi-shopping-cart"></i
+                ></a>
+                <a href="#" class="btn btn--mini-rounded"
+                  ><i class="zmdi zmdi-favorite-outline"></i
+                ></a>
+                <a href="producto.html" class="btn btn--mini-rounded"
+                  ><i class="zmdi zmdi-eye"></i
+                ></a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="column column-full is-half">
+          <div class="card">
+            <span class="price">Bs29.99</span>
+            <img src="{% static 'img/item-5n.png' %}" alt="Item-5n" />
+            <div class="card-info">
+              <h4 class="has-text-black has-text-centered has-text-weight-bold">
+                Women's Burnt Orenge Casual TEE Bs29.99
+              </h4>
+              <p class="has-text-centered">
+                Classic casual t-shirt for women on the move. 100% cotton.
+              </p>
+              <div class="card-buttons">
+                <a href="#" class="btn btn--mini-rounded"
+                  ><i class="zmdi zmdi-shopping-cart"></i
+                ></a>
+                <a href="#" class="btn btn--mini-rounded"
+                  ><i class="zmdi zmdi-favorite-outline"></i
+                ></a>
+                <a href="producto.html" class="btn btn--mini-rounded"
+                  ><i class="zmdi zmdi-eye"></i
+                ></a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="column column-full is-half">
+          <div class="card">
+            <span class="price">Bs34.79</span>
+            <img src="{% static 'img/item-6n.png' %}" alt="Item-6n" />
+            <div class="card-info">
+              <h4 class="has-text-black has-text-centered has-text-weight-bold">
+                Oshi no Ko Casual TEE $34.79
+              </h4>
+              <p class="has-text-centered">Manga Clasico Popular</p>
+              <div class="card-buttons">
+                <a href="#" class="btn btn--mini-rounded"
+                  ><i class="zmdi zmdi-shopping-cart"></i
+                ></a>
+                <a href="#" class="btn btn--mini-rounded"
+                  ><i class="zmdi zmdi-favorite-outline"></i
+                ></a>
+                <a href="producto.html" class="btn btn--mini-rounded"
+                  ><i class="zmdi zmdi-eye"></i
+                ></a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="container container-full">
+  <div class="columns is-centered is-multiline">
+    <div class="column is-full">
+      <div class="separator"></div>
+    </div>
+    <div class="column is-half-tablet is-one-third-desktop column-half">
+      <div class="card card-second">
+        <img
+          class="card-second-image"
+          src="{% static 'img/lookbook-men.png' %}"
+          alt=""
+        />
+      </div>
+    </div>
+    <div class="column is-half-tablet is-one-third-desktop column-half">
+      <div class="card card-second">
+        <img
+          class="card-second-image"
+          src="{% static 'img/lookbook-women.png' %}"
+          alt=""
+        />
+      </div>
+    </div>
+    <div class="column is-half-tablet is-one-third-desktop">
+      <div class="card card-second">
+        <img
+          class="card-second-image"
+          src="{% static 'img/lookbook-you.png' %}"
+          alt=""
+        />
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Agregar un modal personalizado para el mensaje de inicio de sesión -->
+<div id="mensaje" style="display: none;">
+    Debes iniciar sesión para acceder al contenido.
+</div>
+<script>
+    // Obtener todas las imágenes con la clase 'c_m_home'
+    const cMHomeImgs = document.querySelectorAll('.c_m_home');
+
+    // Iterar sobre cada imagen y agregar un event listener
+    cMHomeImgs.forEach(img => {
+        img.addEventListener('click', () => {
+            // Verificar si el usuario está autenticado
+            const isAuthenticated = true; // Aquí debes poner tu lógica de autenticación
+
+            // Si el usuario no está autenticado, mostrar el mensaje
+            if (!isAuthenticated) {
+                document.getElementById('mensaje').style.display = 'block';
+            } else {
+                // Aquí puedes redirigir al usuario a la página de inicio de sesión si prefieres
+                // window.location.href = '/signin/';
+            }
+        });
+    });
+</script>
+
+{% endblock %}

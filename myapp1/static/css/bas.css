@@ -1,0 +1,130 @@
+@import url(https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap);
+/*border: 10px solid red;   sirve para ,arcar el contenido de rojo e identificarlo*/
+body{
+    display: grid;
+    min-height: 100vh;
+    grid-template-rows: auto 1fr auto;
+    background-color: black;
+    
+}
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Open Sans', sans-serif;
+}
+
+
+.footers.custom-footer{
+    width: 100%;
+    background-color: #0a141d; /*Color del footer*/
+    
+    
+}
+
+.footers.custom-footer div{
+    background-color: #0a141d;
+}
+
+.footers.custom-footer .group-1{
+    width: 100%;
+    max-width: 1700px;
+    margin: auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /*Dividir el grupo 1 en columnas de 3 todo el ancho*/
+    grid-gap: 50px;
+    padding: 10px 0px; /*largo de footer */
+    
+}
+
+.footers.custom-footer .group-1 .box figure{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.footers.custom-footer .group-1 .box figure img{
+    width: 250px;
+}
+
+.footers.custom-footer .group-1 .box h2{
+    color: white;
+    margin-bottom: 25px; /*Separa abajo los párrafos p*/
+    font-size: 19px; /*Tamaño de letra de h2*/
+    font-weight: bold; /* Agregar grosor y negrita */
+
+}
+.footers.custom-footer .group-1 .box p{
+    color: #efefef;
+    margin-bottom: 10px;/*separación entre párrafos p*/
+}
+
+.footers.custom-footer .red-social{
+    width: 100%;
+    max-width: 1700px;
+    margin: auto;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /*Dividir el grupo 1 en columnas de 3 todo el ancho*/
+    grid-gap: 50px;
+    padding: 10px 0px; /*largo de footer */
+    
+}
+
+.footers.custom-footer .group-1 .red-social div{
+    display: block;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: -50px; /* Espacio entre cada ícono y texto */ 
+
+    
+}
+
+
+.footers.custom-footer .group-1 .red-social a {
+    display: inline-block;
+    text-decoration: none;
+    color: white;
+    margin-right: 10px;
+    background-color: #0d2033;
+    text-align: center;
+    border-radius: 10%;
+    font-size: 10px;
+    padding: 10px 20px; /* Ajusta el relleno según sea necesario */
+    line-height: normal; /* Restablece la altura de línea */
+    transition: all 300ms else;
+}
+
+
+.footers.custom-footer .group-1 .red-social a:hover {
+    background-color: rgba(255, 255, 255, 0.814);
+    color: black; 
+}
+
+.footers.custom-footer .group-2 {
+    background-color: #0a1a2a;
+    padding: 15px 10px;
+    text-align: center;
+    color: white;
+}
+.footers.custom-footer .group-2 small{
+    font-size: 15px;
+}
+
+/*Hacerlo Responsivo*/
+@media screen and (max-width:800px){
+    .footers.custom-footer .group-1{
+        width: 90%;
+        grid-template-columns: repeat(1, 1fr); /*Dividir el grupo 1 en columnas de 3 todo el ancho*/
+        grid-gap: 30px;
+        padding: 20px 0px;
+    }
+
+    .footers.custom-footer .group-1 .box figure img{
+        width: 100px;
+    }
+    
+}
+
