@@ -368,7 +368,10 @@ def add_to_cart_inline(request, product_id):
         else:
             # Incrementar la cantidad en el carrito y reducir el stock del producto
             cart_item.quantity += 1
-            product.stock -= 1
+            if product.stock > 0:  # Verificar si hay suficiente stock
+                product.stock -= 1
+            else:
+                return JsonResponse({'success': False, 'error': 'No hay suficiente stock disponible'})
     else:
         # Si el objeto es nuevo en el carrito, la cantidad será 1
         cart_item.quantity = 1
@@ -382,6 +385,7 @@ def add_to_cart_inline(request, product_id):
     return JsonResponse({'success': True, 'message': 'Producto agregado al carrito', 'order_total_price': order_total_price})
 
 @login_required
+@transaction.atomic
 @require_http_methods(["DELETE"])
 def remove_from_cart(request, item_id):
     try:
@@ -407,6 +411,7 @@ def remove_from_cart(request, item_id):
 
 
 @login_required
+@transaction.atomic
 @require_POST
 def increase_quantity(request, item_id):
     try:
@@ -435,6 +440,7 @@ def increase_quantity(request, item_id):
     
 
 @login_required
+@transaction.atomic
 @require_POST
 def decrease_quantity(request, item_id):
     try:
@@ -465,6 +471,7 @@ def decrease_quantity(request, item_id):
 
 
 @login_required
+@transaction.atomic
 @require_POST
 def clear_cart(request):
     try:
