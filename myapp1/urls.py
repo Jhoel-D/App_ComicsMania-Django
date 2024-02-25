@@ -10,7 +10,6 @@ urlpatterns = [
     #login
     path('signup/',views.signup, name= 'signup'),
     path('signin/',views.signin, name= 'signin'),
-    path('signin_signup/', views.signin_signup, name='signin_signup'),
     path('signin_new/', views.signin_new, name='signin_new'),
     path('signup_new/', views.signup_new, name='signup_new'),
     #Task
@@ -47,8 +46,10 @@ urlpatterns = [
     path('clear_cart/', views.clear_cart, name='clear_cart'),
     
     path('cart_pay', views.cart_pay, name='cart_pay'),
-    
-    
+    #Para order
+    path('create_order/', views.create_order, name='create_order'),  # URL para crear una orden
+    path('orders/', views.order_list, name='order_list'),            # URL para listar órdenes
+    path('order/<int:order_id>/', views.order_detail, name='order_detail'),  # URL para ver detalles de una orden
     
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

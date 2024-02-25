@@ -454,3 +454,43 @@ def clear_cart(request):
 
 def cart_pay(request):
     return render(request, 'cart_pay.html')
+
+
+from django.shortcuts import redirect
+
+@login_required
+def create_order(request):
+    if request.method == 'POST':
+        # Obtener los elementos del carrito del usuario actual
+        cart_items = CartItem.objects.filter(user=request.user)
+        # Calcular el precio total de la orden
+        total_price = sum(item.comic.price_bs * item.quantity for item in cart_items)
+        # Crear una nueva instancia de Order y guardar los datos en la base de datos
+        order = Order.objects.create(user=request.user, total_price=total_price, status='Pendiente')
+        # Agregar los elementos del carrito a la nueva orden y eliminarlos del carrito
+        for cart_item in cart_items:
+            order.items.add(cart_item, through_defaults={'quantity': cart_item.quantity})
+            cart_item.delete()
+        # Redirigir al usuario a la página de detalles de la orden recién creada
+        return redirect('order_detail', order_id=order.id)
+    else:
+        # Si la solicitud no es POST, mostrar un error o redirigir a la página de inicio
+        return JsonResponse({'success': False, 'error': 'Método no permitido'})
+
+    
+@login_required
+def order_detail(request, order_id):
+    # Obtener la orden con el ID proporcionado
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    
+    # Renderizar la plantilla de detalles de la orden con los datos de la orden
+    return render(request, 'order_detail.html', {'order': order})
+
+@login_required
+def order_list(request):
+    # Obtener todas las órdenes del usuario actual
+    orders = Order.objects.filter(user=request.user)
+    
+    # Renderizar la plantilla de lista de órdenes con las órdenes del usuario
+    return render(request, 'order_list.html', {'orders': orders})
+

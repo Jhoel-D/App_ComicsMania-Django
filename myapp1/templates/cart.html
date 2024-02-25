@@ -13,7 +13,11 @@
         <p>Total: <span id="total-carrito">{{ total_price }}</span> Bs</p>
         <p>Cantidad: <span id="cantidad-carrito">{{ cart_items|length }}</span></p>
         <p>Total de Productos: <span id="total-productos">{{ total_products }}</span></p>
-        <a href="{% url 'cart_pay' %}" class="button is-primary">Pagar</a>
+        <form id="checkout-form" method="post" action="{% url 'create_order' %}">
+          {% csrf_token %}
+          <button type="submit" class="button is-primary">Pagar</button>
+        </form>
+
         <a href="#" class="button is-danger" onclick="clearCart()">Vaciar Carrito</a>
       </div>
     </div>
@@ -68,6 +72,32 @@
     const decreaseQuantityUrl = "{% url 'decrease_quantity' 0 %}";
     const clearCartUrl = "{% url 'clear_cart' %}";
 
+    $(document).ready(function() {
+    $('#checkout-form').submit(function(event) {
+        event.preventDefault(); // Evitar el envío del formulario predeterminado
+        
+        // Enviar la solicitud POST al servidor
+        $.ajax({
+            type: 'POST',
+            url: $(this).attr('action'),
+            data: $(this).serialize(),
+            success: function(response) {
+                if (response.success) {
+                    // Si la orden se crea con éxito, redirigir al usuario a la página de detalles de la orden
+                    window.location.href = "/order/" + response.order_id + "/";
+                } else {
+                    // Si hay un error, mostrar un mensaje de error
+                    alert(response.error);
+                }
+            },
+            error: function(xhr, status, error) {
+                // Manejar errores de red u otros errores
+                console.error('Error:', error);
+            }
+        });
+    });
+});
+
    function actualizarInterfazDeUsuario(nuevoTotal, nuevaCantidad, total_products) {
     // Actualiza el total del carrito
     document.getElementById('total-carrito').textContent = nuevoTotal;
@@ -83,7 +113,7 @@
 }
 
 
-function removeFromCart(itemId) {
+   function removeFromCart(itemId) {
         fetch(`/remove_from_cart/${itemId}/`, {
             method: 'DELETE',
             headers: {
@@ -110,7 +140,7 @@ function removeFromCart(itemId) {
         .catch(error => console.error('Error:', error));
     }
     
-    function increaseQuantity(itemId) {
+   function increaseQuantity(itemId) {
         fetch(increaseQuantityUrl.replace('0', itemId), {
             method: 'POST',
             headers: {
@@ -132,7 +162,7 @@ function removeFromCart(itemId) {
         .catch(error => console.error('Error:', error));
     }
 
-    function decreaseQuantity(itemId) {
+   function decreaseQuantity(itemId) {
         fetch(decreaseQuantityUrl.replace('0', itemId), {
             method: 'POST',
             headers: {
@@ -154,7 +184,7 @@ function removeFromCart(itemId) {
         .catch(error => console.error('Error:', error));
     }
 
-    function clearCart() {
+   function clearCart() {
         fetch(clearCartUrl, {
             method: 'POST',
             headers: {
