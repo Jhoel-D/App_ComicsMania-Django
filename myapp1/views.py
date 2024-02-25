@@ -198,52 +198,8 @@ def delete_task(request, task_id):
     if request.method == 'POST':
         task.delete()
         return redirect('tasks')
-
-
-
-# Nuevo login y registro
-
-from django.contrib.auth.models import User
-
-
-def signin_signup(request):
-    if request.method == 'POST':
-        if 'register' in request.POST:
-            form = CustomUserCreationForm(request.POST)
-            if form.is_valid():
-                if form.cleaned_data['password1'] == form.cleaned_data['password2']:
-                    try:
-                        user = form.save(commit=False)
-                        user.full_name = form.cleaned_data['full_name']
-                        user.birth_date = form.cleaned_data['birth_date']
-                        user.save()
-                        login(request, user)
-                        return redirect('home')
-                    except IntegrityError:
-                        error_message = 'El nombre de usuario ya está en uso. Por favor, elige otro.'
-                        return render(request, 'signin_signup.html', {'form': form, 'error_message': error_message})
-                else:
-                    error_message = 'Las contraseñas no coinciden.'
-                    return render(request, 'signin_signup.html', {'form': form, 'error_message': error_message})
-            else:
-                error_message = 'Por favor, corrige los errores del formulario.'
-                return render(request, 'signin_signup.html', {'form': form, 'error_message': error_message})
-        elif 'login' in request.POST:
-            username = request.POST.get('username')
-            password = request.POST.get('password')
-            user = authenticate(request, username=username, password=password)
-            if user is not None:
-                login(request, user)
-                return redirect('home')
-            else:
-                error_message = 'El nombre de usuario o la contraseña son incorrectos. Por favor, inténtalo de nuevo.'
-                return render(request, 'signin_signup.html', {'error_message': error_message})
-                
-    else:
-        form = CustomUserCreationForm()
-        return render(request, 'signin_signup.html', {'form': form})
     
-
+from django.contrib.auth.models import User
 #Carrito
 @login_required 
 def add_to_cart(request):
@@ -450,11 +406,7 @@ def decrease_quantity(request, item_id):
             cart_item.comic.stock += 1
             cart_item.comic.save()
             cart_item.save()
-        else:
-            # Si la cantidad es 1, eliminar el elemento del carrito y devolver el stock al producto
-            cart_item.comic.stock += 1
-            cart_item.comic.save()
-        ###cart_item.delete()
+        
         
         # Obtener el precio total actualizado de la orden
         order_total_price = sum(item.comic.price_bs * item.quantity for item in request.user.cartitem_set.all())
