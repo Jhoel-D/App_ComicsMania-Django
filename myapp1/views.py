@@ -477,13 +477,28 @@ def create_order(request):
         # Si la solicitud no es POST, mostrar un error o redirigir a la página de inicio
         return JsonResponse({'success': False, 'error': 'Método no permitido'})
 
-    
 @login_required
 def order_detail(request, order_id):
     # Obtener la orden con el ID proporcionado
     order = get_object_or_404(Order, id=order_id, user=request.user)
     
-    # Renderizar la plantilla de detalles de la orden con los datos de la orden
+    if request.method == 'POST':
+        # Actualizar los detalles faltantes de la orden con los datos proporcionados en la solicitud
+        order.shipping_address = request.POST.get('shipping_address')
+        order.first_name = request.POST.get('first_name')
+        order.last_name = request.POST.get('last_name')
+        order.zone = request.POST.get('zone')
+        order.city = request.POST.get('city')
+        order.country = request.POST.get('country')
+        order.payment_method = request.POST.get('payment_method')
+        
+        # Guardar la orden actualizada
+        order.save()
+        
+        # Redirigir al usuario a la página de integración del método de pago
+        #return redirect('/')  # Reemplaza 'integración método pago' con la URL adecuada para la integración del método de pago
+        return redirect('order_detail', order_id=order_id)
+    
     return render(request, 'order_detail.html', {'order': order})
 
 @login_required

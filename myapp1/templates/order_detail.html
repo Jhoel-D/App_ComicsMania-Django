@@ -1,0 +1,64 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h1 class="card-title">Detalles de la Orden</h1>
+                </div>
+                <div class="card-body">
+                    <!-- Detalles de la orden -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>ID de Orden:</strong> {{ order.id }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Total de la Orden:</strong> {{ order.total_price }} Bs</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Estado:</strong> {{ order.status }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <!-- Formulario para actualizar la dirección de envío -->
+                            <form id="update-shipping-address-form" method="post">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    <label for="shipping_address">Dirección de Envío</label>
+                                    <input class="form-control" type="text" name="shipping_address" value="{{ order.shipping_address }}" placeholder="Incluye el # de puerta">
+                                    <label for="shipping_address">Primer Nombre</label>
+                                    <input class="form-control" type="text" name="first_name" value="{{ order.first_name }}" placeholder="Ingrese su primer nombre">
+                                    <label for="shipping_address">Primer Apellido</label>
+                                    <input class="form-control" type="text" name="last_name" value="{{ order.last_name}}" placeholder="Ingrese su primer apellido">
+                                    
+                                    <label for="shipping_address">País</label>
+                                     <select id="city" name="city" class="form-control">
+                                      {% for code, country_name in order.COUNTRY_CHOICES %}
+                                      <option value="{{ code }}" {% if code == order.country %} selected {% endif %}>{{ country_name }}</option>
+                                      {% endfor %}
+                                    </select>
+
+                                    <label for="shipping_address">Zona</label>
+                                    <input class="form-control" type="text" name="zone" value="{{ order.zone }}" placeholder="Zona:">
+                                    <label for="city">Selecciona tu ciudad:</label>
+                                    <select id="city" name="city" class="form-control">
+                                      {% for code, city_name in order.BOLIVIAN_DEPARTMENTS %}
+                                      <option value="{{ code }}" {% if code == order.city %} selected {% endif %}>{{ city_name }}</option>
+                                      {% endfor %}
+                                    </select>
+                                </div>
+                                <button class="btn btn-primary" type="submit">Actualizar Dirección</button>
+                                <a href="#" class="btn btn-secondary">Cancelar</a>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

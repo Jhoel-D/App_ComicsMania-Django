@@ -88,18 +88,47 @@ class CartItem(models.Model):
     added_at = models.DateTimeField(auto_now_add=True)
 
 class Order(models.Model):
+    DEFAULT_COUNTRY = 'Bolivia'
+
+    COUNTRY_CHOICES = [
+        (DEFAULT_COUNTRY, 'Bolivia'),
+    ]
     STATUS_CHOICES = [
         ('Pendiente', 'Pendiente'),
         ('En Proceso', 'En Proceso'),
         ('Completado', 'Completado'),
         ('Cancelado', 'Cancelado'),
     ]
+    PAYMENT_CHOICES = [
+        ('PayPal', 'PayPal'),
+        ('Mercado Libre', 'Mercado Libre'),
+        ('Otro', 'Otro'),
+    ]
+    
+    BOLIVIAN_DEPARTMENTS = [
+        ('LP', 'La Paz'),
+        ('CBB', 'Cochabamba'),
+        ('SCZ', 'Santa Cruz'),
+        ('OR', 'Oruro'),
+        ('PT', 'Potosí'),
+        ('TJ', 'Tarija'),
+        ('CH', 'Chuquisaca'),
+        ('BE', 'Beni'),
+        ('PD', 'Pando'),
+        ('LP', 'El Alto'),
+    ]
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     items = models.ManyToManyField(CartItem)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     shipping_address = models.CharField(max_length=255)
-    created_at = models.DateTimeField(auto_now_add=True)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    zone = models.CharField(max_length=100)
+    city = models.CharField(max_length=100, choices=BOLIVIAN_DEPARTMENTS)
+    country = models.CharField(max_length=100, choices=COUNTRY_CHOICES, default=DEFAULT_COUNTRY)
+    payment_method = models.CharField(max_length=50, choices=PAYMENT_CHOICES, default='PayPal')
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='Pendiente')
+    created_at = models.DateTimeField(auto_now_add=True)
 
 class Comments(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
