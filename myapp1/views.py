@@ -477,6 +477,7 @@ def create_order(request):
         # Si la solicitud no es POST, mostrar un error o redirigir a la página de inicio
         return JsonResponse({'success': False, 'error': 'Método no permitido'})
 
+
 @login_required
 def order_detail(request, order_id):
     # Obtener la orden con el ID proporcionado
@@ -491,12 +492,26 @@ def order_detail(request, order_id):
         order.city = request.POST.get('city')
         order.country = request.POST.get('country')
         order.payment_method = request.POST.get('payment_method')
+        order.shipping_method = request.POST.get('shipping_method')
+        
+        # Obtener el costo del método de envío seleccionado y sumarlo al total_price
+        shipping_method_cost = int(request.POST.get('shipping_method', 0))
+        
+        # Verificar si el costo del envío ya ha sido aplicado previamente
+        if not order.shipping_cost_applied:
+            order.total_price += shipping_method_cost
+            order.shipping_cost_applied = True
+            order.shipping_method_cost = shipping_method_cost  # Guardar el costo del método de envío
+        else:
+            # Restar el costo del envío anterior al total_price antes de sumar el nuevo costo
+            order.total_price -= order.shipping_method_cost
+            order.total_price += shipping_method_cost
+            order.shipping_method_cost = shipping_method_cost  # Actualizar el costo del método de envío
         
         # Guardar la orden actualizada
         order.save()
         
         # Redirigir al usuario a la página de integración del método de pago
-        #return redirect('/')  # Reemplaza 'integración método pago' con la URL adecuada para la integración del método de pago
         return redirect('order_detail', order_id=order_id)
     
     return render(request, 'order_detail.html', {'order': order})

@@ -88,6 +88,11 @@ class CartItem(models.Model):
     added_at = models.DateTimeField(auto_now_add=True)
 
 class Order(models.Model):
+    SHIPPING_CHOICES = [
+        (0, 'Recojer en Tienda (Gratis)'),
+        (10, 'Envio de Tienda (+10 Bs)'),
+    ]
+    
     DEFAULT_COUNTRY = 'Bolivia'
 
     COUNTRY_CHOICES = [
@@ -126,9 +131,12 @@ class Order(models.Model):
     zone = models.CharField(max_length=100)
     city = models.CharField(max_length=100, choices=BOLIVIAN_DEPARTMENTS)
     country = models.CharField(max_length=100, choices=COUNTRY_CHOICES, default=DEFAULT_COUNTRY)
+    shipping_method = models.IntegerField(choices=SHIPPING_CHOICES, default=0) 
     payment_method = models.CharField(max_length=50, choices=PAYMENT_CHOICES, default='PayPal')
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='Pendiente')
     created_at = models.DateTimeField(auto_now_add=True)
+    shipping_method_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    shipping_cost_applied = models.BooleanField(default=False)
 
 class Comments(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)

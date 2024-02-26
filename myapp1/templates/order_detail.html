@@ -45,13 +45,21 @@
                                     <label for="shipping_address">Zona</label>
                                     <input class="form-control" type="text" name="zone" value="{{ order.zone }}" placeholder="Zona:">
                                     <label for="city">Selecciona tu ciudad:</label>
+                                    
                                     <select id="city" name="city" class="form-control">
                                       {% for code, city_name in order.BOLIVIAN_DEPARTMENTS %}
                                       <option value="{{ code }}" {% if code == order.city %} selected {% endif %}>{{ city_name }}</option>
                                       {% endfor %}
                                     </select>
+
+                                    <label for="shipping_method">Método de Envío</label>
+                                    <select class="form-control" name="shipping_method" id="shipping_method">
+                                    {% for cost, label in order.SHIPPING_CHOICES %}
+                                         <option value="{{ cost }}">{{ label }}</option>
+                                    {% endfor %}
+                                    </select>
                                 </div>
-                                <button class="btn btn-primary" type="submit">Actualizar Dirección</button>
+                                <button class="btn btn-primary" type="submit">Realizar Compra</button>
                                 <a href="#" class="btn btn-secondary">Cancelar</a>
                             </form>
                         </div>
