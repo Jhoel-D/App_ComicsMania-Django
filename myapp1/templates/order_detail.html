@@ -17,7 +17,9 @@
                             <p><strong><i class="fas fa-dollar-sign"></i> Total de la Orden:</strong> {{ order.total_price }} Bs</p>
                         </div>
                         <div class="col-md-4">
-                            <form id="update-shipping-address-form" method="post" action="{% url 'order_detail' order_id=order.id %}">
+
+                            <form id="payment-form" method="post" action="{% url 'order_detail' order_id=order.id %}">
+
 
                                 {% csrf_token %}
                                 <div class="form-group bg-light">
@@ -40,13 +42,13 @@
                                         {% endfor %}
                                     </select>
                                 </div>
-                            </div>
-                            <div class="col-md-4">
+                             </div>
+                             <div class="col-md-4">
                                 <div class="form-group bg-light">
-                                    <label for="city"><i class="fas fa-building"></i> Departamento</label>
+                                    <label for="city"><i class="fas fa-building"></i> Departamento: </label>
                                     <select id="city" name="city" class="form-control">
-                                        {% for code, city_name in order.BOLIVIAN_DEPARTMENTS %}
-                                            <option value="{{ code }}" {% if code == order.city %} selected {% endif %}>{{ city_name }}</option>
+                                        {% for code, city in order.BOLIVIAN_DEPARTMENTS %}
+                                            <option value="{{ code }}" {% if code == order.city %} selected {% endif %}>{{ city }}</option>
                                         {% endfor %}
                                     </select>
                                 </div>
@@ -61,31 +63,36 @@
                                             <option value="{{ cost }}">{{ label }}</option>
                                         {% endfor %}
                                     </select>
+
+                                    <div class="form-group">
+                                        <button id="confirm-order-button" class="btn btn-primary" type="submit"><i class="fas fa-check"></i> Confirmar Datos</button>
+                                        <a href="#" class="btn btn-secondary"><i class="fas fa-times"></i> Cancelar Orden</a>
+                                    </div>
                                 </div>
                                 <div class="form-group">
                                     <label for="payment_method"><i class="fas fa-credit-card"><strong><i class="fas fa-card"></i> MÉTODO DE PAGO:</strong></i></label>
                                     
                                     <div>
                                         {% for method in order.PAYMENT_CHOICES %}
-                                            <div class="form-check" style="margin-bottom: 10px;">
-                                                <input class="form-check-input" type="radio" name="payment_method" value="{{ method.0 }}" id="{{ method.0 }}" style="margin-right: 5px;">
-                                                <label class="form-check-label" for="{{ method.0 }}">
-                                                    {% if method.0 == 'PayPal' %}
-                                                        <img src="{% static 'img/PayPal.png' %}" alt="PayPal" style="width: 100px; height: auto; margin-right: 10px;">
-                                                    {% elif method.0 == 'Mercado Libre' %}
-                                                        <img src="{% static 'img/mercado_l.png' %}" alt="Mercado Libre" style="width: 100px; height: auto; margin-right: 10px;">
-                                                    {% else %}
-                                                        <i class="fas fa-credit-card"></i> {{ method.1 }}
-                                                    {% endif %}
-                                                </label>
-                                            </div>
-                                        {% endfor %}
+                                        <div class="form-check" style="margin-bottom: 10px;">
+                                            <input class="form-check-input" type="radio" name="payment_method" value="PayPal" id="PayPal" onchange="togglePayPalContainer()">
+
+                                            <label class="form-check-label" for="{{ method.0 }}">
+                                                {% if method.0 == 'PayPal' %}
+                                                    <img src="{% static 'img/PayPal.png' %}" alt="PayPal" style="width: 100px; height: auto; margin-right: 10px;">
+                                                    <div id="paypal-container" style="display: none;">
+                                                        <!-- Contenido de PayPal -->
+                                                        <div id="paypal-button-container"></div>
+                                                    </div>
+                                                {% elif method.0 == 'Mercado Libre' %}
+                                                    <img src="{% static 'img/mercado_l.png' %}" alt="Mercado Libre" style="width: 100px; height: auto; margin-right: 10px;">
+                                                {% else %}
+                                                    <i class="fas fa-credit-card"></i> {{ method.1 }}
+                                                {% endif %}
+                                            </label>
+                                        </div>
+                                    {% endfor %}
                                     </div>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <button id="confirm-order-button" class="btn btn-primary" type="button"><i class="fas fa-check"></i> Confirmar</button>
-                                    <a href="#" class="btn btn-secondary"><i class="fas fa-times"></i> Cancelar</a>
                                 </div>
                             </form>
                         </div>
@@ -96,17 +103,61 @@
     </div>
 </div>
 
+<!-- Contenedor de PayPal (inicialmente oculto) -->
+<div id="paypal-container" style="display: none;">
+    <!-- Contenido de PayPal -->
+    <div id="paypal-button-container"></div>
+</div>
+
+    
+    
+<!-- Script para mostrar u ocultar el contenedor de PayPal y otros métodos de pago -->
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    document.getElementById("confirm-order-button").addEventListener("click", function() {
-        var selectedPaymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
-        if (selectedPaymentMethod === 'PayPal') {
-            var form = document.getElementById("update-shipping-address-form");
-            //form.action = "{% url 'order_detail' order_id=order.id %}";// Agrega aquí la URL a la que quieres enviar la solicitud POST
-            form.action = "/order/{{ order.id }}/";
-            form.submit();
+    // Función para mostrar u ocultar el contenedor de PayPal
+    function togglePayPalContainer() {
+        var paypalRadio = document.getElementById('PayPal');
+        var paypalContainer = document.getElementById('paypal-container');
+
+        // Ocultar el contenedor de PayPal si el radio de PayPal no está seleccionado
+        if (!paypalRadio.checked) {
+            paypalContainer.style.display = 'none';
+        } else {
+            paypalContainer.style.display = 'block';
         }
-    });
-});
+    }
 </script>
+<!-- Script de PayPal -->
+<script src="https://www.paypal.com/sdk/js?client-id=ASN1mNwEDNB287Si0Ock9BSi8KWcMOk0ileCfImWBlekUoZGbgx0dcRt6LtJqtjlJeS2vXufxHVkAYIT"></script>
+<script>
+    paypal
+        .Buttons({
+            createOrder: function (data, actions) {
+                return actions.order.create({
+                    purchase_units: [
+                        {
+                            amount: {
+                                value: "{{ order.total_price }}", // Precio dinámico basado en el total de la orden
+                            },
+                        },
+                    ],
+                });
+            },
+            onApprove: function (data, actions) {
+                return actions.order.capture().then(function (details) {
+                    // Muestra un mensaje de alerta cuando se completa la transacción
+                    alert("Transacción completada por " + details.payer.name.given_name);
+                    // Envía el formulario para guardar la orden
+                    document.getElementById("payment-form").submit();
+                });
+            },
+        })
+        .render("#paypal-button-container");
+
+    // Agregamos un evento de clic al botón de PayPal para desencadenar la acción del formulario
+    document.getElementById("paypal-button-container").addEventListener("click", function() {
+        // Simulamos un clic en el botón de confirmación del formulario
+        document.getElementById("confirm-order-button").click();
+    });
+</script>
+
 {% endblock %}

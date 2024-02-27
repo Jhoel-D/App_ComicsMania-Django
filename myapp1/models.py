@@ -120,7 +120,7 @@ class Order(models.Model):
         ('CH', 'Chuquisaca'),
         ('BE', 'Beni'),
         ('PD', 'Pando'),
-        ('LP', 'El Alto'),
+        ('El Alto', 'El Alto'),
     ]
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     items = models.ManyToManyField(CartItem)
@@ -132,7 +132,7 @@ class Order(models.Model):
     city = models.CharField(max_length=100, choices=BOLIVIAN_DEPARTMENTS)
     country = models.CharField(max_length=100, choices=COUNTRY_CHOICES, default=DEFAULT_COUNTRY)
     shipping_method = models.IntegerField(choices=SHIPPING_CHOICES, default=0) 
-    payment_method = models.CharField(max_length=50, choices=PAYMENT_CHOICES, default='PayPal')
+    payment_method = models.CharField(max_length=50, choices=PAYMENT_CHOICES)
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='Pendiente')
     created_at = models.DateTimeField(auto_now_add=True)
     shipping_method_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)

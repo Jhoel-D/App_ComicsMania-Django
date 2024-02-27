@@ -11,7 +11,7 @@ from django.http import JsonResponse
 from django.contrib import messages
 
 
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.conf import settings
 from paypalcheckoutsdk.orders import OrdersCreateRequest
 from paypalcheckoutsdk.core import PayPalHttpClient, SandboxEnvironment, LiveEnvironment
@@ -515,50 +515,17 @@ def order_detail(request, order_id):
             order.total_price -= order.shipping_method_cost
             order.total_price += shipping_method_cost
             order.shipping_method_cost = shipping_method_cost  # Actualizar el costo del método de envío
-        
-        # Si el método de pago es PayPal, proceder con la integración de PayPal
-        if order.payment_method == 'PayPal':
-            # Crear una instancia del entorno de PayPal
-            if settings.PAYPAL_MODE == 'live':
-                environment = LiveEnvironment(client_id=settings.PAYPAL_CLIENT_ID, client_secret=settings.PAYPAL_CLIENT_SECRET)
-            else:
-                environment = SandboxEnvironment(client_id=settings.PAYPAL_CLIENT_ID, client_secret=settings.PAYPAL_CLIENT_SECRET)
-                
-            client = PayPalHttpClient(environment)
-            
-            # Crear la orden de PayPal
-            request = OrdersCreateRequest()
-            request.prefer("return=representation")
-            request.request_body(
-                {
-                    "intent": "CAPTURE",
-                    "purchase_units": [
-                        {
-                            "amount": {
-                                "currency_code": "USD",  # Cambia a tu moneda local
-                                "value": str(order.total_price)  # Total de la orden
-                            }
-                        }
-                    ]
-                }
-            )
-            
-            try:
-                response = client.execute(request)
-                order.paypal_order_id = response.result.id  # Guardar el ID de la orden de PayPal
-                order.save()
-                return redirect(response.result.links[1].href)  # Redirigir al enlace de aprobación de PayPal
-            except Exception as e:
-                return render(request, 'order_detail.html', {'order': order, 'error_message': str(e)})
-        
         # Guardar la orden actualizada
         order.save()
         
         # Redirigir al usuario a la página de detalles de la orden
-        return HttpResponse("Detalles de la orden actualizados correctamente")  # Por ejemplo, puedes devolver un mensaje de éxito
+        #return redirect("Detalles de la orden actualizados correctamente")  # Por ejemplo, puedes devolver un mensaje de éxito
+        return render(request, 'order_detail.html', {'order': order})
     else:
         # Lógica para manejar otras solicitudes (GET, etc.)
         return render(request, 'order_detail.html', {'order': order})
+    
+    
 @login_required
 def order_list(request):
     # Obtener todas las órdenes del usuario actual
