@@ -4,63 +4,89 @@
 {% block content %}
 <div class="container mt-4">
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-md-10">
             <div class="card">
-                <div class="card-header bg-dark text-white">
-                    <h1 class="card-title">Detalles de la Orden</h1>
+                <div class="card-header bg-primary text-white">
+                    <h1 class="card-title"><i class="fas fa-shopping-cart"></i> Detalles de la Orden</h1>
                 </div>
                 <div class="card-body">
-                    <!-- Detalles de la orden -->
                     <div class="row">
-                        <div class="col-md-6">
-                            <p><strong>ID de Orden:</strong> {{ order.id }}</p>
+                        <div class="col-md-4">
+                            <p><strong><i class="fas fa-id-card"></i> ID de Orden:</strong> {{ order.id }}</p>
+                            <p><strong><i class="fas fa-info-circle"></i> Estado:</strong> {{ order.status }}</p>
+                            <p><strong><i class="fas fa-dollar-sign"></i> Total de la Orden:</strong> {{ order.total_price }} Bs</p>
                         </div>
-                        <div class="col-md-6">
-                            <p><strong>Total de la Orden:</strong> {{ order.total_price }} Bs</p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p><strong>Estado:</strong> {{ order.status }}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <!-- Formulario para actualizar la dirección de envío -->
-                            <form id="update-shipping-address-form" method="post">
+                        <div class="col-md-4">
+                            <form id="update-shipping-address-form" method="post" action="{% url 'order_detail' order_id=order.id %}">
+
                                 {% csrf_token %}
-                                <div class="form-group">
-                                    <label for="shipping_address">Dirección de Envío</label>
+                                <div class="form-group bg-light">
+                                    <label for="shipping_address"><i class="fas fa-map-marker-alt"></i> Dirección de Envío</label>
                                     <input class="form-control" type="text" name="shipping_address" value="{{ order.shipping_address }}" placeholder="Incluye el # de puerta">
-                                    <label for="shipping_address">Primer Nombre</label>
+                                </div>
+                                <div class="form-group bg-light">
+                                    <label for="first_name"><i class="fas fa-user"></i> Primer Nombre</label>
                                     <input class="form-control" type="text" name="first_name" value="{{ order.first_name }}" placeholder="Ingrese su primer nombre">
-                                    <label for="shipping_address">Primer Apellido</label>
-                                    <input class="form-control" type="text" name="last_name" value="{{ order.last_name}}" placeholder="Ingrese su primer apellido">
-                                    
-                                    <label for="shipping_address">País</label>
-                                     <select id="city" name="city" class="form-control">
-                                      {% for code, country_name in order.COUNTRY_CHOICES %}
-                                      <option value="{{ code }}" {% if code == order.country %} selected {% endif %}>{{ country_name }}</option>
-                                      {% endfor %}
-                                    </select>
-
-                                    <label for="shipping_address">Zona</label>
-                                    <input class="form-control" type="text" name="zone" value="{{ order.zone }}" placeholder="Zona:">
-                                    <label for="city">Selecciona tu ciudad:</label>
-                                    
-                                    <select id="city" name="city" class="form-control">
-                                      {% for code, city_name in order.BOLIVIAN_DEPARTMENTS %}
-                                      <option value="{{ code }}" {% if code == order.city %} selected {% endif %}>{{ city_name }}</option>
-                                      {% endfor %}
-                                    </select>
-
-                                    <label for="shipping_method">Método de Envío</label>
-                                    <select class="form-control" name="shipping_method" id="shipping_method">
-                                    {% for cost, label in order.SHIPPING_CHOICES %}
-                                         <option value="{{ cost }}">{{ label }}</option>
-                                    {% endfor %}
+                                </div>
+                                <div class="form-group bg-light">
+                                    <label for="last_name"><i class="fas fa-user"></i> Primer Apellido</label>
+                                    <input class="form-control" type="text" name="last_name" value="{{ order.last_name }}" placeholder="Ingrese su primer apellido">
+                                </div>
+                                <div class="form-group bg-light">
+                                    <label for="country"><i class="fas fa-globe-americas"></i> País</label>
+                                    <select id="country" name="country" class="form-control">
+                                        {% for code, country_name in order.COUNTRY_CHOICES %}
+                                            <option value="{{ code }}" {% if code == order.country %} selected {% endif %}>{{ country_name }}</option>
+                                        {% endfor %}
                                     </select>
                                 </div>
-                                <button class="btn btn-primary" type="submit">Realizar Compra</button>
-                                <a href="#" class="btn btn-secondary">Cancelar</a>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group bg-light">
+                                    <label for="city"><i class="fas fa-building"></i> Departamento</label>
+                                    <select id="city" name="city" class="form-control">
+                                        {% for code, city_name in order.BOLIVIAN_DEPARTMENTS %}
+                                            <option value="{{ code }}" {% if code == order.city %} selected {% endif %}>{{ city_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group bg-light">
+                                    <label for="zone"><i class="fas fa-map-pin"></i> Zona</label>
+                                    <input class="form-control" type="text" name="zone" value="{{ order.zone }}" placeholder="Zona">
+                                </div>
+                                <div class="form-group bg-light">
+                                    <label for="shipping_method"><i class="fas fa-truck"></i> Método de Envío</label>
+                                    <select class="form-control" name="shipping_method" id="shipping_method">
+                                        {% for cost, label in order.SHIPPING_CHOICES %}
+                                            <option value="{{ cost }}">{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="payment_method"><i class="fas fa-credit-card"><strong><i class="fas fa-card"></i> MÉTODO DE PAGO:</strong></i></label>
+                                    
+                                    <div>
+                                        {% for method in order.PAYMENT_CHOICES %}
+                                            <div class="form-check" style="margin-bottom: 10px;">
+                                                <input class="form-check-input" type="radio" name="payment_method" value="{{ method.0 }}" id="{{ method.0 }}" style="margin-right: 5px;">
+                                                <label class="form-check-label" for="{{ method.0 }}">
+                                                    {% if method.0 == 'PayPal' %}
+                                                        <img src="{% static 'img/PayPal.png' %}" alt="PayPal" style="width: 100px; height: auto; margin-right: 10px;">
+                                                    {% elif method.0 == 'Mercado Libre' %}
+                                                        <img src="{% static 'img/mercado_l.png' %}" alt="Mercado Libre" style="width: 100px; height: auto; margin-right: 10px;">
+                                                    {% else %}
+                                                        <i class="fas fa-credit-card"></i> {{ method.1 }}
+                                                    {% endif %}
+                                                </label>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <button id="confirm-order-button" class="btn btn-primary" type="button"><i class="fas fa-check"></i> Confirmar</button>
+                                    <a href="#" class="btn btn-secondary"><i class="fas fa-times"></i> Cancelar</a>
+                                </div>
                             </form>
                         </div>
                     </div>
@@ -69,4 +95,18 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    document.getElementById("confirm-order-button").addEventListener("click", function() {
+        var selectedPaymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+        if (selectedPaymentMethod === 'PayPal') {
+            var form = document.getElementById("update-shipping-address-form");
+            //form.action = "{% url 'order_detail' order_id=order.id %}";// Agrega aquí la URL a la que quieres enviar la solicitud POST
+            form.action = "/order/{{ order.id }}/";
+            form.submit();
+        }
+    });
+});
+</script>
 {% endblock %}

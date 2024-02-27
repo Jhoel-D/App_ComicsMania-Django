@@ -51,5 +51,8 @@ urlpatterns = [
     path('orders/', views.order_list, name='order_list'),            # URL para listar órdenes
     path('order/<int:order_id>/', views.order_detail, name='order_detail'),  # URL para ver detalles de una orden
     
+    path('prueba/', views.hola, name= 'prueba'),
+    #path('pago/', views.pago, name= 'pago'),
+    
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

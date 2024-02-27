@@ -13,11 +13,16 @@
         "ljae",
         "Mangas",
         "mysql",
+        "paypal",
+        "paypalcheckoutsdk",
+        "paypalrestsdk",
+        "primittive",
         "Proy",
         "Renderizar",
         "signin",
         "signout",
-        "Temas"
+        "Temas",
+        "unicode"
     ],
     "cSpell.language": "en,es-ES",
     "CodeGPT.apiKey": "CodeGPT Plus Beta"
