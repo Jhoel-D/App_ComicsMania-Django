@@ -16,9 +16,14 @@ from django.conf import settings
 from paypalcheckoutsdk.orders import OrdersCreateRequest
 from paypalcheckoutsdk.core import PayPalHttpClient, SandboxEnvironment, LiveEnvironment
 
-     
+import json
+from django.http.response import JsonResponse        
 def hola(request):
     return render(request, template_name= 'paypal.html') 
+    
+    
+def cart_pay(request, total_price):
+   pass
     
 def home(request):
     return render(request, 'home.html')
@@ -458,10 +463,6 @@ def clear_cart(request):
         return JsonResponse({'success': True, 'message': 'Carrito vaciado correctamente', 'cart_item_count': cart_item_count, 'order_total_price': order_total_price, 'total_products': total_products})
     except CartItem.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Error al vaciar el carrito'})
-    
-
-def cart_pay(request):
-    return render(request, 'cart_pay.html')
 
 
 from django.shortcuts import redirect
