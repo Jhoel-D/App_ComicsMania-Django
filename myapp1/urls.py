@@ -53,6 +53,6 @@ urlpatterns = [
     
     path('prueba/', views.hola, name= 'prueba'),
     
-    
+    path('order/<int:order_id>/cancel/', views.cancel_order, name='cancel_order'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

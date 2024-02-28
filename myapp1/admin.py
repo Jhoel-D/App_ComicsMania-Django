@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
 from .models import Task
-from .models import ComicsMangas, Comments, Categories, CategoryType, Genres, Publisher, Themes, Languages, Rating, CartItem, Order
+from .models import ComicsMangas, Comments, Categories, CategoryType, Genres, Publisher, Themes, Languages, Rating, CartItem, Order, ItemsOrder
 
 class UserAdmin(BaseUserAdmin):
     fieldsets = (
@@ -36,4 +36,5 @@ admin.site.register(CategoryType)
 admin.site.register(Languages)
 admin.site.register(CartItem)
 admin.site.register(Order)
+admin.site.register(ItemsOrder)
 

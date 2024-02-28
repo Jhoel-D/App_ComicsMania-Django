@@ -3,7 +3,7 @@ from django.contrib.auth.forms import CustomUserCreationForm, AuthenticationForm
 from django.contrib.auth import login, logout, authenticate
 from django.db import IntegrityError, transaction
 from .forms import TaskForm, CommentForm
-from .models import Task, ComicsMangas,Rating, Comments, CartItem, Order
+from .models import Task, ComicsMangas,Rating, Comments, CartItem, Order, ItemsOrder
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST, require_http_methods
@@ -151,9 +151,7 @@ def tasks_completed(request):
 @login_required
 def signout (request):
     logout(request)
-    return redirect ('home')
-
-        
+    return redirect ('home')  
 
 # Crear Tareas
 @login_required
@@ -306,12 +304,15 @@ def submit_rating(request, comic_manga_id):
 
 
 
-#Carrito Producto
 @login_required
 def cart_view(request):
+    # Obtener los elementos del carrito del usuario actual que no están en ninguna orden
     cart_items = CartItem.objects.filter(user=request.user)
+    
+    # Calcular el precio total de los elementos en el carrito
     total_price = sum(item.comic.price_bs * item.quantity for item in cart_items)
     
+    # Calcular el total de productos en el carrito
     total_products = sum(item.quantity for item in cart_items)
     
     return render(request, 'cart.html', {'cart_items': cart_items, 'total_price': total_price, 'total_products': total_products})
@@ -465,26 +466,74 @@ def clear_cart(request):
         return JsonResponse({'success': False, 'error': 'Error al vaciar el carrito'})
 
 
-from django.shortcuts import redirect
-
+from django.db import transaction
 @login_required
+@transaction.atomic
 def create_order(request):
     if request.method == 'POST':
-        # Obtener los elementos del carrito del usuario actual
-        cart_items = CartItem.objects.filter(user=request.user)
-        # Calcular el precio total de la orden
-        total_price = sum(item.comic.price_bs * item.quantity for item in cart_items)
-        # Crear una nueva instancia de Order y guardar los datos en la base de datos
-        order = Order.objects.create(user=request.user, total_price=total_price, status='Pendiente')
-        # Agregar los elementos del carrito a la nueva orden y eliminarlos del carrito
-        for cart_item in cart_items:
-            order.items.add(cart_item, through_defaults={'quantity': cart_item.quantity})
-            cart_item.delete()
-        # Redirigir al usuario a la página de detalles de la orden recién creada
-        return redirect('order_detail', order_id=order.id)
+        try:
+            # Obtener los elementos del carrito del usuario actual
+            cart_items = CartItem.objects.filter(user=request.user)
+            
+            # Verificar si hay elementos en el carrito
+            if not cart_items:
+                return JsonResponse({'success': False, 'error': 'El carrito está vacío'})
+            
+            # Calcular el precio total de la orden
+            total_price = sum(item.comic.price_bs * item.quantity for item in cart_items)
+            
+            # Crear una nueva instancia de Order y guardar los datos en la base de datos
+            with transaction.atomic():
+                order = Order.objects.create(
+                    user=request.user,
+                    total_price=total_price,
+                    status='Pendiente',
+                    shipping_address=request.POST.get('shipping_address', ''),
+                    first_name=request.POST.get('first_name', ''),
+                    last_name=request.POST.get('last_name', ''),
+                    zone=request.POST.get('zone', ''),
+                    city=request.POST.get('city', ''),
+                    country=request.POST.get('country', ''),
+                    shipping_method=request.POST.get('shipping_method', 0),
+                    payment_method=request.POST.get('payment_method', '')
+                )
+                
+                # Agregar los elementos del carrito a la orden
+                order.items.add(*[ItemsOrder.objects.create(
+                    user=request.user,
+                    comic=cart_item.comic,
+                    quantity=cart_item.quantity,
+                ) for cart_item in cart_items])
+                
+                # Limpiar el carrito
+                cart_items.delete()
+            
+            # Redirigir al usuario a la página de detalles de la orden recién creada
+            return redirect('order_detail', order_id=order.id)
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
     else:
         # Si la solicitud no es POST, mostrar un error o redirigir a la página de inicio
         return JsonResponse({'success': False, 'error': 'Método no permitido'})
+    
+@login_required
+@transaction.atomic
+def cancel_order(request, order_id):
+    try:
+        # Obtener la orden con el ID proporcionado y perteneciente al usuario actual
+        order = get_object_or_404(Order, id=order_id, user=request.user)
+        
+        # Devolver el stock de los comics asociados a la orden
+        for item in order.items.all():
+            item.comic.stock += item.quantity
+            item.comic.save()
+            
+        # Eliminar la orden y los ItemsOrder asociados serán eliminados automáticamente debido a la ForeignKey
+        order.delete()
+        
+        return JsonResponse({'success': True, 'message': 'Orden cancelada correctamente'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
 
 
 @login_required
@@ -520,11 +569,11 @@ def order_detail(request, order_id):
         order.save()
         
         # Redirigir al usuario a la página de detalles de la orden
-        #return redirect("Detalles de la orden actualizados correctamente")  # Por ejemplo, puedes devolver un mensaje de éxito
         return render(request, 'order_detail.html', {'order': order})
     else:
         # Lógica para manejar otras solicitudes (GET, etc.)
         return render(request, 'order_detail.html', {'order': order})
+
     
     
 @login_required

@@ -1,10 +1,9 @@
 
 from django.contrib.auth.models import User
-#from django.contrib.auth.models import AbstractUser
 from django.db import models  # Importa models de Django
 from django.core.validators import MinValueValidator, MaxValueValidator
-
-
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 class Task(models.Model):
     title = models.CharField(max_length=100)
     descripction = models.TextField(blank = True)
@@ -67,7 +66,6 @@ class ComicsMangas(models.Model): #Comics Manga
     stock = models.IntegerField()
     cover_img = models.ImageField(upload_to='images/', verbose_name='Image', null=True)
     
-    
     def __str__(self):
         fila = f"Title: {self.title} - by: {self.author} - Stock: {self.stock}"
         return fila
@@ -87,6 +85,12 @@ class CartItem(models.Model):
     quantity = models.PositiveIntegerField(default=1)
     added_at = models.DateTimeField(auto_now_add=True)
 
+class ItemsOrder(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    comic = models.ForeignKey(ComicsMangas, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+    added_at = models.DateTimeField(auto_now_add=True)
+    
 class Order(models.Model):
     SHIPPING_CHOICES = [
         (0, 'Recojer en Tienda (Gratis)'),
@@ -123,7 +127,7 @@ class Order(models.Model):
         ('El Alto', 'El Alto'),
     ]
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    items = models.ManyToManyField(CartItem)
+    items = models.ManyToManyField(ItemsOrder, related_name='orders', blank=True)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     shipping_address = models.CharField(max_length=255)
     first_name = models.CharField(max_length=100)
@@ -137,6 +141,10 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     shipping_method_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     shipping_cost_applied = models.BooleanField(default=False)
+    
+@receiver(pre_delete, sender=Order)
+def delete_items_order(sender, instance, **kwargs):
+    instance.items.all().delete()
 
 class Comments(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)

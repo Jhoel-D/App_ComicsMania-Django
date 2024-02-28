@@ -66,8 +66,7 @@
 
                                     <div class="form-group">
                                         <button id="confirm-order-button" class="btn btn-primary" type="submit"><i class="fas fa-check"></i> Confirmar Datos</button>
-                                        <a href="#" class="btn btn-secondary"><i class="fas fa-times"></i> Cancelar Orden</a>
-                                    </div>
+                                        <button id="cancel-order-button" class="btn btn-secondary" type="button"><i class="fas fa-times"></i> Cancelar Orden</button>
                                 </div>
                                 <div class="form-group">
                                     <label for="payment_method"><i class="fas fa-credit-card"><strong><i class="fas fa-card"></i> MÉTODO DE PAGO:</strong></i></label>
@@ -103,13 +102,36 @@
     </div>
 </div>
 
-<!-- Contenedor de PayPal (inicialmente oculto) -->
-<div id="paypal-container" style="display: none;">
-    <!-- Contenido de PayPal -->
-    <div id="paypal-button-container"></div>
-</div>
-
-    
+ <!-- Script para manejar la cancelación de la orden -->
+ <script>
+    document.getElementById("cancel-order-button").addEventListener("click", function() {
+        if (confirm("¿Estás seguro de que deseas cancelar esta orden?")) {
+            // Enviar una solicitud POST para cancelar la orden
+            fetch("{% url 'cancel_order' order_id=order.id %}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Redirigir o hacer algo en caso de éxito
+                    alert("Orden cancelada correctamente");
+                    // Por ejemplo, redirigir a la página principal
+                    window.location.href = "{% url 'home' %}";
+                } else {
+                    // Manejar errores de cancelación de orden
+                    alert("Error al cancelar la orden");
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Error al cancelar la orden");
+            });
+        }
+    });
+</script>
+   
     
 <!-- Script para mostrar u ocultar el contenedor de PayPal y otros métodos de pago -->
 <script>
@@ -125,33 +147,34 @@
             paypalContainer.style.display = 'block';
         }
     }
+
 </script>
 <!-- Script de PayPal -->
 <script src="https://www.paypal.com/sdk/js?client-id=ASN1mNwEDNB287Si0Ock9BSi8KWcMOk0ileCfImWBlekUoZGbgx0dcRt6LtJqtjlJeS2vXufxHVkAYIT"></script>
 <script>
-    paypal
-        .Buttons({
-            createOrder: function (data, actions) {
-                return actions.order.create({
-                    purchase_units: [
-                        {
-                            amount: {
-                                value: "{{ order.total_price }}", // Precio dinámico basado en el total de la orden
-                            },
+    paypal.Buttons({
+        createOrder: function (data, actions) {
+            return actions.order.create({
+                purchase_units: [
+                    {
+                        amount: {
+                            value: "{{ order.total_price }}",
                         },
-                    ],
-                });
-            },
-            onApprove: function (data, actions) {
-                return actions.order.capture().then(function (details) {
-                    // Muestra un mensaje de alerta cuando se completa la transacción
-                    alert("Transacción completada por " + details.payer.name.given_name);
-                    // Envía el formulario para guardar la orden
-                    document.getElementById("payment-form").submit();
-                });
-            },
-        })
-        .render("#paypal-button-container");
+                    },
+                ],
+            });
+        },
+        onApprove: function (data, actions) {
+            return actions.order.capture().then(function (details) {
+                // Envía el formulario para guardar la orden
+                document.getElementById("payment-form").submit();
+                // Muestra un mensaje de alerta cuando se completa la transacción
+                alert("Transacción completada por " + details.payer.name.given_name);
+                // Redirecciona a la página de inicio después de completar la transacción
+                window.location.href = "{% url 'home' %}";
+            });
+        },
+    }).render("#paypal-button-container");
 
     // Agregamos un evento de clic al botón de PayPal para desencadenar la acción del formulario
     document.getElementById("paypal-button-container").addEventListener("click", function() {
