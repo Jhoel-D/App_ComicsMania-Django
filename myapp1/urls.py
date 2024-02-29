@@ -54,5 +54,9 @@ urlpatterns = [
     path('prueba/', views.hola, name= 'prueba'),
     
     path('order/<int:order_id>/cancel/', views.cancel_order, name='cancel_order'),
+    
+    path('get_cart_total/', views.get_cart_total, name='get_cart_total'),
+    #path('payment_confirmation/<int:order_id>/', views.payment_confirmation, name='payment_confirmation'),
+    
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

@@ -17,11 +17,10 @@
                             <p><strong><i class="fas fa-dollar-sign"></i> Total de la Orden:</strong> {{ order.total_price }} Bs</p>
                         </div>
                         <div class="col-md-4">
-
-                            <form id="payment-form" method="post" action="{% url 'order_detail' order_id=order.id %}">
-
-
+                            <!-- Formulario para datos de envío -->
+                            <form id="data-form" method="post" action="{% url 'order_detail' order_id=order.id %}">
                                 {% csrf_token %}
+                                <input type="hidden" name="form_type" value="update-form"> 
                                 <div class="form-group bg-light">
                                     <label for="shipping_address"><i class="fas fa-map-marker-alt"></i> Dirección de Envío</label>
                                     <input class="form-control" type="text" name="shipping_address" value="{{ order.shipping_address }}" placeholder="Incluye el # de puerta">
@@ -42,8 +41,6 @@
                                         {% endfor %}
                                     </select>
                                 </div>
-                             </div>
-                             <div class="col-md-4">
                                 <div class="form-group bg-light">
                                     <label for="city"><i class="fas fa-building"></i> Departamento: </label>
                                     <select id="city" name="city" class="form-control">
@@ -56,26 +53,21 @@
                                     <label for="zone"><i class="fas fa-map-pin"></i> Zona</label>
                                     <input class="form-control" type="text" name="zone" value="{{ order.zone }}" placeholder="Zona">
                                 </div>
+                                <button id="save-data-button" class="btn btn-primary" type="submit"><i class="fas fa-check"></i> Guardar Datos</button>
+                            </form>
+                        </div>
+                        <div class="col-md-4">
+                            <!-- Formulario para método de pago -->
+                            <form id="payment-form" method="post" action="{% url 'order_detail' order_id=order.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="form_type" value="payment-form"> 
                                 <div class="form-group bg-light">
-                                    <label for="shipping_method"><i class="fas fa-truck"></i> Método de Envío</label>
-                                    <select class="form-control" name="shipping_method" id="shipping_method">
-                                        {% for cost, label in order.SHIPPING_CHOICES %}
-                                            <option value="{{ cost }}">{{ label }}</option>
-                                        {% endfor %}
-                                    </select>
-
-                                    <div class="form-group">
-                                        <button id="confirm-order-button" class="btn btn-primary" type="submit"><i class="fas fa-check"></i> Confirmar Datos</button>
-                                        <button id="cancel-order-button" class="btn btn-secondary" type="button"><i class="fas fa-times"></i> Cancelar Orden</button>
-                                </div>
-                                <div class="form-group">
-                                    <label for="payment_method"><i class="fas fa-credit-card"><strong><i class="fas fa-card"></i> MÉTODO DE PAGO:</strong></i></label>
+                                    <label for="payment_method"><i class="fas fa-credit-card"><strong><i class="fas fa-card"></i> REALIZAR EL PAGO POR::</strong></i></label>
                                     
                                     <div>
                                         {% for method in order.PAYMENT_CHOICES %}
                                         <div class="form-check" style="margin-bottom: 10px;">
-                                            <input class="form-check-input" type="radio" name="payment_method" value="PayPal" id="PayPal" onchange="togglePayPalContainer()">
-
+                                            <input class="form-check-input" type="radio" name="payment_method" value="{{ method.0 }}" id="{{ method.0 }}" onchange="togglePaymentContainer('{{ method.0 }}')">
                                             <label class="form-check-label" for="{{ method.0 }}">
                                                 {% if method.0 == 'PayPal' %}
                                                     <img src="{% static 'img/PayPal.png' %}" alt="PayPal" style="width: 100px; height: auto; margin-right: 10px;">
@@ -93,6 +85,11 @@
                                     {% endfor %}
                                     </div>
                                 </div>
+                                <div class="form-group">
+                                   <button id="confirm-payment-button" class="btn btn-primary" type="submit" style="display: none;"><i class="fas fa-check"></i> Confirmar Pago</button>
+
+                                    <button id="cancel-order-button" class="btn btn-secondary" type="button"><i class="fas fa-times"></i> No comprar Orden</button>
+                                </div>
                             </form>
                         </div>
                     </div>
@@ -102,8 +99,8 @@
     </div>
 </div>
 
- <!-- Script para manejar la cancelación de la orden -->
- <script>
+<!-- Script para manejar la cancelación de la orden -->
+<script>
     document.getElementById("cancel-order-button").addEventListener("click", function() {
         if (confirm("¿Estás seguro de que deseas cancelar esta orden?")) {
             // Enviar una solicitud POST para cancelar la orden
@@ -131,34 +128,35 @@
         }
     });
 </script>
-   
-    
-<!-- Script para mostrar u ocultar el contenedor de PayPal y otros métodos de pago -->
-<script>
-    // Función para mostrar u ocultar el contenedor de PayPal
-    function togglePayPalContainer() {
-        var paypalRadio = document.getElementById('PayPal');
-        var paypalContainer = document.getElementById('paypal-container');
 
-        // Ocultar el contenedor de PayPal si el radio de PayPal no está seleccionado
-        if (!paypalRadio.checked) {
-            paypalContainer.style.display = 'none';
-        } else {
+<script>
+    // Función para mostrar u ocultar el contenedor de PayPal y otros métodos de pago
+    function togglePaymentContainer(paymentMethod) {
+        var paypalContainer = document.getElementById('paypal-container');
+        
+        if (paymentMethod === 'PayPal') {
             paypalContainer.style.display = 'block';
+        } else {
+            paypalContainer.style.display = 'none';
         }
     }
-
 </script>
-<!-- Script de PayPal -->
+
 <script src="https://www.paypal.com/sdk/js?client-id=ASN1mNwEDNB287Si0Ock9BSi8KWcMOk0ileCfImWBlekUoZGbgx0dcRt6LtJqtjlJeS2vXufxHVkAYIT"></script>
 <script>
+    // Convertir el monto a dólares usando la tasa de cambio (supongamos 1 USD = 6.9 BOB)
+    var totalInBob = parseFloat("{{ order.total_price }}");
+    var exchangeRate = 6.9; // Supongamos que 1 USD = 6.9 BOB
+    var totalInUsd = totalInBob / exchangeRate;
+
     paypal.Buttons({
         createOrder: function (data, actions) {
             return actions.order.create({
                 purchase_units: [
                     {
                         amount: {
-                            value: "{{ order.total_price }}",
+                            currency_code: 'USD', // Monto en dólares
+                            value: totalInUsd.toFixed(2), // Redondeamos a 2 decimales
                         },
                     },
                 ],
@@ -179,7 +177,7 @@
     // Agregamos un evento de clic al botón de PayPal para desencadenar la acción del formulario
     document.getElementById("paypal-button-container").addEventListener("click", function() {
         // Simulamos un clic en el botón de confirmación del formulario
-        document.getElementById("confirm-order-button").click();
+        document.getElementById("confirm-payment-button").click();
     });
 </script>
 

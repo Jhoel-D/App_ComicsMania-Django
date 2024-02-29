@@ -1,0 +1,26 @@
+{% extends 'layouts/base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h1 class="card-title">¡Pago completado!</h1>
+                </div>
+                <div class="card-body">
+                    <p>¡Gracias por su compra!</p>
+                    <p>El pago se ha completado con éxito y su orden ha sido marcada como completa.</p>
+                    <p>Detalles de la Orden:</p>
+                    <ul>
+                        <li>ID de Orden: {{ order.id }}</li>
+                        <li>Estado: Completo</li>
+                        <li>Total de la Orden: {{ order.total_price }} Bs</li>
+                        <!-- Agrega más detalles de la orden si es necesario -->
+                    </ul>
+                    <a href="{% url 'home' %}" class="btn btn-primary">Volver a la página de inicio</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

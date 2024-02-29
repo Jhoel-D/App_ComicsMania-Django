@@ -137,8 +137,9 @@
                 <a class="nav-link" href="{% url 'cart_view' %}">
                     <i class="fa fa-shopping-cart"></i> Carrito: 
                     {% if cart_total > 0 %}
-                        <span class="badge badge-pill badge-primary">Bs {{ cart_total }}</span>
-                       
+                        <span id="cart-total" class="badge badge-pill badge-primary">Bs {{ cart_total }}</span>
+                    {% else %}
+                        <span id="cart-total" class="badge badge-pill badge-primary">Bs 0.00 !No haz añadido nada!</span>
                     {% endif %}
                 </a>
               </li>
