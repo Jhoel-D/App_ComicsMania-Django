@@ -597,3 +597,6 @@ def order_list(request):
     # Renderizar la plantilla de lista de órdenes con las órdenes del usuario
     return render(request, 'order_list.html', {'orders': orders})
 
+def orders_by_status(request, status):
+    orders = Order.objects.filter(status=status)
+    return render(request, 'order_list.html', {'orders': orders})

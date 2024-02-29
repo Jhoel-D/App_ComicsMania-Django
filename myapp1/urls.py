@@ -50,10 +50,13 @@ urlpatterns = [
     path('create_order/', views.create_order, name='create_order'),  # URL para crear una orden
     path('orders/', views.order_list, name='order_list'),            # URL para listar órdenes
     path('order/<int:order_id>/', views.order_detail, name='order_detail'),  # URL para ver detalles de una orden
+    path('orders/<str:status>/', views.orders_by_status, name='orders_by_status'),
+    
+    path('order/<int:order_id>/cancel/', views.cancel_order, name='cancel_order'),
     
     path('prueba/', views.hola, name= 'prueba'),
     
-    path('order/<int:order_id>/cancel/', views.cancel_order, name='cancel_order'),
+  
     
     path('get_cart_total/', views.get_cart_total, name='get_cart_total'),
     #path('payment_confirmation/<int:order_id>/', views.payment_confirmation, name='payment_confirmation'),
