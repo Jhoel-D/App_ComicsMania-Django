@@ -4,6 +4,8 @@ from django.db import models  # Importa models de Django
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
+from django.utils import timezone
+
 class Task(models.Model):
     title = models.CharField(max_length=100)
     descripction = models.TextField(blank = True)
@@ -91,6 +93,10 @@ class ItemsOrder(models.Model):
     quantity = models.PositiveIntegerField(default=1)
     added_at = models.DateTimeField(auto_now_add=True)
     
+    def __str__(self):
+        fila = f"User: {self.user.username} - Comic (Manga): {self.comic.title}  - Quantity: {self.quantity}"
+        return fila
+    
 class Order(models.Model):
     SHIPPING_CHOICES = [
         (0, 'Recojer en Tienda (Gratis)'),
@@ -104,9 +110,8 @@ class Order(models.Model):
     ]
     STATUS_CHOICES = [
         ('Pendiente', 'Pendiente'),
-        ('En Proceso', 'En Proceso'),
+        ('Pagado', 'Pagado'),
         ('Completado', 'Completado'),
-        ('Cancelado', 'Cancelado'),
     ]
     PAYMENT_CHOICES = [
         ('PayPal', 'PayPal'),
@@ -141,10 +146,26 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     shipping_method_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     shipping_cost_applied = models.BooleanField(default=False)
+    delivered = models.BooleanField(default=False)
+    delivery_date = models.DateTimeField(blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        if self.delivered and not self.delivery_date:
+            # Si la orden se marca como entregada y no hay una fecha de entrega, establecer la fecha actual
+            self.delivery_date = timezone.now()
+        elif not self.delivered:
+            # Si la orden se marca como no entregada, establecer la fecha de entrega en blanco
+            self.delivery_date = None
+        super().save(*args, **kwargs)
     
+    def __str__(self):
+        return self.status + ' - by '+ self.user.username  
+
 @receiver(pre_delete, sender=Order)
 def delete_items_order(sender, instance, **kwargs):
     instance.items.all().delete()
+    
+
 
 class Comments(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)

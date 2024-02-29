@@ -560,19 +560,28 @@ def order_detail(request, order_id):
             order.zone = request.POST.get('zone')
             order.city = request.POST.get('city')
             order.country = request.POST.get('country')
+            # Obtener el costo del método de envío seleccionado y sumarlo al total_price
             
+            shipping_method_cost = int(request.POST.get('shipping_method', 0))
+            if not order.shipping_cost_applied:
+               order.total_price += shipping_method_cost
+               order.shipping_cost_applied = True
+               order.shipping_method_cost = shipping_method_cost  # Guardar el costo del método de envío
+            else:
+                # Restar el costo del envío anterior al total_price antes de sumar el nuevo costo
+                order.total_price -= order.shipping_method_cost
+                order.total_price += shipping_method_cost
+                order.shipping_method_cost = shipping_method_cost  # Actualizar el costo del método de envío
+        # Guardar la orden actualizada
             # Guardar la orden actualizada
             order.save()
             
             # Redirigir al usuario a la página de detalles de la orden
             return HttpResponseRedirect(request.path)
         elif form_type == 'payment-form':
-            # Procesar datos del formulario de método de pago
             order.payment_method = request.POST.get('payment_method')
-            order.status = "Completado"
+            order.status = "Pagado"
             order.save()
-            
-            # Redirigir al usuario a la página de detalles de la orden
             return HttpResponseRedirect(request.path)
 
     # Si no es una solicitud POST o no se proporcionó un form_type válido, renderizar la página de detalles de la orden
