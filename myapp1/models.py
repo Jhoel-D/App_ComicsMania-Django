@@ -64,7 +64,7 @@ class ComicsMangas(models.Model): #Comics Manga
     volume = models.IntegerField(null=True)
     theme = models.ForeignKey(Themes, on_delete=models.CASCADE)
     genre = models.ForeignKey(Genres, on_delete=models.CASCADE)
-    category = models.ForeignKey(Categories, on_delete=models.CASCADE)
+    category = models.ManyToManyField(Categories)  # Relación many-to-many con Categories
     stock = models.IntegerField()
     cover_img = models.ImageField(upload_to='images/', verbose_name='Image', null=True)
     

@@ -21,10 +21,9 @@ from django.http.response import JsonResponse
 def hola(request):
     return render(request, template_name= 'paypal.html') 
     
-    
 def cart_pay(request, total_price):
    pass
-    
+
 def home(request):
     return render(request, 'home.html')
 
@@ -584,17 +583,20 @@ def order_detail(request, order_id):
             order.save()
             return HttpResponseRedirect(request.path)
 
-    # Si no es una solicitud POST o no se proporcionó un form_type válido, renderizar la página de detalles de la orden
-    return render(request, 'order_detail.html', {'order': order})
-
-    
-    
+    # Si no es una solicitud POST o no se proporcionó un form_type válido, Renderizar la página de detalles de la orden
+    return render(request, 'order_detail.html', {'order': order})    
 @login_required
-def order_list(request):
-    # Obtener todas las órdenes del usuario actual
-    orders = Order.objects.filter(user=request.user)
-    
-    # Renderizar la plantilla de lista de órdenes con las órdenes del usuario
+def order_list(request, status=None):
+    # Filtrar por usuario
+    user = request.user
+    # Si se proporciona un estado, filtrar por usuario y estado
+    if status:
+        orders = Order.objects.filter(user=user, status=status)
+    else:
+        # Si no se proporciona un estado, obtener todas las órdenes del usuario
+        orders = Order.objects.filter(user=user)
+    # Verifica en el servidor si las órdenes son correctas (opcional, solo para depuración)
+    print(f"Usuario: {user}, Órdenes: {orders}")
     return render(request, 'order_list.html', {'orders': orders})
 
 def orders_by_status(request, status):

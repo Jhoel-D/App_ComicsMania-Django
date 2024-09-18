@@ -7,34 +7,38 @@
     <div class="col-md-8 offset-md-2">
       <h1 class="text-center display-3 text-white py-5">Órdenes Completadas o en Proceso</h1>
       <div class="mb-3">
-        <p>
-          <a href="{% url 'orders_by_status' status='Pendiente' %}" class="btn btn-danger"><i class="fas fa-exclamation-circle"></i> Pendiente</a>
-          <a href="{% url 'orders_by_status' status='Pagado' %}" class="btn btn-warning"><i class="fas fa-money-bill-wave"></i> Pagado</a>
-          <a href="{% url 'orders_by_status' status='Completado' %}" class="btn btn-success"><i class="fas fa-check-circle"></i> Completado</a>
-          <a href="{% url 'order_list' %}" class="btn btn-info"><i class="fas fa-exclamation-circle"></i> Ver todo</a>
+        <>
+          <a href="{% url 'orders_by_status' status='Pendiente' %}" class="btn {% if request.path == '/orders/Pendiente/' %}btn-danger{% else %}btn-outline-danger{% endif %}"><i class="fas fa-exclamation-circle"></i> Pendiente</a>
+          <a href="{% url 'orders_by_status' status='Pagado' %}" class="btn {% if request.path == '/orders/Pagado/' %}btn-warning{% else %}btn-outline-warning{% endif %}"><i class="fas fa-money-bill-wave"></i> Pagado</a>
+          <a href="{% url 'orders_by_status' status='Completado' %}" class="btn {% if request.path == '/orders/Completado/' %}btn-success{% else %}btn-outline-success{% endif %}"><i class="fas fa-check-circle"></i> Completado</a>
+          <a href="{% url 'order_list' %}" class="btn {% if request.path == '/orders/' %}btn-info{% else %}btn-outline-info{% endif %}"><i class="fas fa-exclamation-circle"></i> Ver todo</a>
         </p>
       </div>
       <div class="list-group">
-        {% for order in orders %}
-        <a class="list-group-item list-group-item-action" href="{% url 'order_detail' order.id %}">
-          <div class="d-flex w-100 justify-content-between align-items-center">
-            <h5 class="mb-1">ID de compra: {{ order.id }}</h5>
-            <small>{{ order.created_at|date:'M j Y:i' }}</small>
-          </div>
-          <p class="mb-1">Estado: 
-            {% if order.status == 'Pendiente' %}
-              <span class="text-danger"><i class="fas fa-exclamation-circle"></i> Pendiente</span>
-            {% elif order.status == 'Pagado' %}
-              <span class="text-warning"><i class="fas fa-money-bill-wave"></i> Pagado</span>
-            {% elif order.status == 'Completado' %}
-              <span class="text-success"><i class="fas fa-check-circle"></i> Completado</span>
-            {% endif %}
-          </p>
-          <p class="mb-1">Total: {{ order.total_price }} Bs</p>
-          <p class="mb-1">Cliente: {{ order.user.username }}</p>
-          <span class="text-info"><i class="fas fa-exclamation-circle"></i> Ver detalles</span>
-        </a>
-        {% endfor %}
+        {% if orders %}
+            {% for order in orders %}
+            <a class="list-group-item list-group-item-action" href="{% url 'order_detail' order.id %}">
+              <div class="d-flex w-100 justify-content-between align-items-center">
+                <h5 class="mb-1">ID de compra: {{ order.id }}</h5>
+                <small>{{ order.created_at|date:'M j Y:i' }}</small>
+              </div>
+              <p class="mb-1">Estado: 
+                {% if order.status == 'Pendiente' %}
+                  <span class="text-danger"><i class="fas fa-exclamation-circle"></i> Pendiente</span>
+                {% elif order.status == 'Pagado' %}
+                  <span class="text-warning"><i class="fas fa-money-bill-wave"></i> Pagado</span>
+                {% elif order.status == 'Completado' %}
+                  <span class="text-success"><i class="fas fa-check-circle"></i> Completado</span>
+                {% endif %}
+              </p>
+              <p class="mb-1">Total: {{ order.total_price }} Bs</p>
+              <p class="mb-1">Cliente: {{ order.user.username }}</p>
+              <span class="text-info"><i class="fas fa-exclamation-circle"></i> Ver detalles</span>
+            </a>
+            {% endfor %}
+        {% else %}
+            <p class="text-warning">No hay órdenes disponibles.</p>
+        {% endif %}
       </div>
     </div>
   </div>

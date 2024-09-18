@@ -123,7 +123,7 @@
   <h2 class="font-semibold has-text-white is-size-3">Reviews</h2>
   <div id="comment-container" class="columns is-multiline">
     {% if comments %}
-      {% for comment in comments|slice:":0" %}
+      {% for comment in comments|slice:":2" %}
       <div class="column is-half">
           <div class="box">
               <div class="text-muted">Published on: {{ comment.publication_date }}</div>

@@ -1,2 +1,2 @@
 #Fantasy ComicsMania
-Esta es una aplicacion web utilizando python y Django
+Esta es una aplicación web utilizando python y Django
