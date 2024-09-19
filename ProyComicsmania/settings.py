@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'myapp1',
     'paypalcheckoutsdk',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [

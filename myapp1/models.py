@@ -47,11 +47,15 @@ class Categories(models.Model): #Categories
     category_type = models.ForeignKey(CategoryType, on_delete=models.CASCADE)
     def __str__(self):
         return self.description if self.description else "No description available"
+class Author(models.Model):  # Autores
+    name = models.CharField(max_length=100)
+    def __str__(self):
+        return self.name
 
 class ComicsMangas(models.Model): #Comics Manga
     title = models.CharField(max_length=100, verbose_name="Title")
     publisher = models.ForeignKey(Publisher, on_delete=models.CASCADE)
-    author = models.CharField(max_length=100)
+    author = models.ManyToManyField(Author)  # Relación many-to-many con Author
     synopsis = models.TextField(max_length=800, null=True, verbose_name='Synopsis')
     pages = models.IntegerField(null=True)
     format = models.CharField(max_length=40, null=True)
@@ -62,7 +66,7 @@ class ComicsMangas(models.Model): #Comics Manga
     audience = models.CharField(max_length=45, null=True)
     price_bs = models.DecimalField(max_digits=10, decimal_places=2)
     volume = models.IntegerField(null=True)
-    theme = models.ForeignKey(Themes, on_delete=models.CASCADE)
+    theme = models.ManyToManyField(Themes)  # Relación many-to-many con Themes
     genre = models.ForeignKey(Genres, on_delete=models.CASCADE)
     category = models.ManyToManyField(Categories)  # Relación many-to-many con Categories
     stock = models.IntegerField()
@@ -74,7 +78,6 @@ class ComicsMangas(models.Model): #Comics Manga
     def delete(self, using=None, keep_parents=False):
         self.cover_img.storage.delete(self.cover_img.name)
         super().delete()
-    
 
 class PaymentMethods(models.Model): #Method de Page
     description = models.CharField(max_length=45, null=True)

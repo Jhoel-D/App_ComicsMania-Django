@@ -239,13 +239,16 @@ def comics_mangas_detail(request, comic_manga_id):
         cart_item_ids = request.user.cartitem_set.values_list('comic_id', flat=True)
     else:
         cart_item_ids = []  # Si el usuario no está autenticado, establecer cart_item_ids como una lis
-    comic_manga = get_object_or_404(ComicsMangas, pk=comic_manga_id)
-    user_rating = Rating.objects.filter(user=request.user, product=comic_manga).first()
-    rating_values = [1, 2, 3, 4, 5]
-    comments = Comments.objects.filter(product=comic_manga, approved=True)
-    user_rating_value = user_rating.value if user_rating else None
-    for comment in comments:
+        
+    comic_manga = get_object_or_404(ComicsMangas, pk=comic_manga_id) #Obtiene comic manga
+    user_rating = Rating.objects.filter(user=request.user, product=comic_manga).first()   # Obtener la calificación del usuario para este producto
+    rating_values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    comments = Comments.objects.filter(product=comic_manga, approved=True)  # Obtener la calificación del usuario para este producto
+    user_rating_value = user_rating.value if user_rating else None # Calificación del usuario (si existe)
+    for comment in comments:   # Asignar calificación de usuario a cada comentario
         comment.user_rating = Rating.objects.filter(user=comment.user, product=comic_manga).first()
+    # Obtener los autores relacionados (porque ahora es una relación muchos a muchos)
+    authors = comic_manga.author.all()
 
     context = {
         'comic_manga': comic_manga,
@@ -253,7 +256,8 @@ def comics_mangas_detail(request, comic_manga_id):
         'user_rating_value': user_rating_value,
         'rating_values': rating_values,
         'user_rating': user_rating,
-        'cart_item_ids': cart_item_ids   }
+        'cart_item_ids': cart_item_ids,
+        'authors': authors,}
     return render(request, 'comics_mangas_detail.html', context)
 
 @login_required
@@ -294,7 +298,7 @@ def load_more_comments(request, comic_manga_id):
 def submit_rating(request, comic_manga_id):
     if request.method == 'POST':
         rating_value = int(request.POST.get('rating'))
-        if rating_value >= 1 and rating_value <= 5:
+        if rating_value >= 1 and rating_value <= 10:
             comic_manga = get_object_or_404(ComicsMangas, pk=comic_manga_id)
             # Buscar si ya existe una calificación del usuario para este producto
             existing_rating = Rating.objects.filter(user=request.user, product=comic_manga).first()
