@@ -17,8 +17,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
     <link rel="stylesheet" href="{% static 'css/bas.css' %}" />
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"rel="stylesheet"/>
-
-
   </head>
   <body>
 
@@ -61,10 +59,15 @@
 
               <li class="nav-item">
                 <a class="nav-link" href="{% url 'order_list' %}">
-                  <i class="zmdi zmdi-shopping-cart"></i> Compras Realizadas
+                  <i class="zmdi zmdi-shopping-cart"></i> Ver Compras
                 </a>
               </li>
-
+              
+              <li class="nav-item"></li>
+                <a class="nav-link" href="{% url 'recommender' %}">
+                  <i class="zmdi zmdi-shopping-cart"></i> Para tí
+                </a>
+              </li>
               <!--  -->
               <li class="nav-item dropdown">
                 <a
@@ -86,32 +89,36 @@
                 </ul>
               </li>
               {% else %}
-
-              <li class="nav-item">
-                <a href="/signin_new/" class="nav-link" id="new_signin"
-                  >Signin_New</a
+              <li class="nav-item dropdown">
+                <a
+                  class="nav-link dropdown-toggle"
+                  href="#"
+                  role="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
                 >
-              </li>
-              <li class="nav-item">
-                <a href="/signup_new/" class="nav-link" id="new_signup"
-                  >Signup_New</a
-                >
-              </li>
-
-              <li class="nav-item">
-                <a class="nav-link" href="/signup/">
-                  <i class="zmdi zmdi-shopping-cart"></i> Signup
+                  Ingresar
                 </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/signin/">
-                  <i class="zmdi zmdi-shopping-cart"></i> Signin
-                </a>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="/signin_new/">Iniciar Sesión</a></li>
+                  <li><a class="dropdown-item" href="/signup_new/"> Registrarse</a></li>
+                  <li><hr class="dropdown-divider" /></li>
+                  <li>
+                    <a class="dropdown-item" href="/signin/">Signin</a>
+                  </li>
+                  <li></li>
+                    <a class="dropdown-item" href="/signup/">Signup</a>
+                  </li>
+                </ul>
               </li>
               {% endif %}
 
               <li class="nav-item">
-                <a class="nav-link" href="/comics_mangas/">Animes</a>
+                <a class="nav-link" href="/comics_mangas/">Mangas</a>
+              </li>
+
+              <li class="nav-item"></li>
+                <a class="nav-link" href="/comics_mangas/">Comics</a>
               </li>
 
               <li class="nav-item dropdown">
@@ -122,7 +129,7 @@
                   data-bs-toggle="dropdown"
                   aria-expanded="false"
                 >
-                  Mangas
+                  Categorías
                 </a>
                 <ul class="dropdown-menu">
                   <li><a class="dropdown-item" href="#">Action</a></li>
@@ -185,25 +192,14 @@
       </div>
       <div class="box">
         <h2>SOBRE NOSOTROS</h2>
-        <p>
-          Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quis,
-          voluptates.
-        </p>
-        <p>
-          Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quis,
-          voluptates.
-        </p>
+        <p> 
+          Somos apasionados por los cómics y mangas. Ofrecemos una selección de títulos, desde los últimos lanzamientos hasta clásicos, además de coleccionables para fanáticos. ¡Únete a nuestra aventura!
       </div>
 
       <div class="box">
         <h2>MAS INFORMACION</h2>
         <p>
-          Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quis,
-          voluptates.
-        </p>
-        <p>
-          Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quis,
-          voluptates.
+          Si tienes preguntas o necesitas ayuda, no dudes en contactarnos. ¡Estamos aquí para acompañarte en tu aventura de lectura! </p>
         </p>
       </div>
 

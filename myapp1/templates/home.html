@@ -1,6 +1,8 @@
 {% extends 'layouts/base.html' %} 
 {% load static %} 
 {% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"/>
+<link rel="stylesheet" href="{% static 'css/comics_mangas.css' %}" />
 <link
   rel="stylesheet"
   href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"/>
@@ -48,18 +50,19 @@
 <div class="row">
   <!-- Barra de navegación lateral con Bootstrap -->
   <aside class="menu is-fixed-left col-md-auto">
-    <p class="menu-label">Categorías</p>
-    <ul class="menu-list">
-      <li><a href="#">Mujer</a></li>
-      <li><a href="#">Hombre</a></li>
-      <li><a href="#">Niños</a></li>
+    <p class="title is-3 has-text-centered text-white py-1">Categorías</p>
+
+    <ul class="menu-list" style="background-color: #c954d6; border-radius: 5px; padding: 1rem;">
+      <li><a href="#" class="has-text-dark has-background-purple is-size-6 has-text-weight-bold py-2 px-3" style="border-radius: 4px;">Mujer</a></li>
+      <li><a href="#" class="has-text-dark has-background-purple is-size-6 has-text-weight-bold py-2 px-3" style="border-radius: 4px;">Hombre</a></li>
+      <li><a href="#" class="has-text-dark has-background-purple is-size-6 has-text-weight-bold py-2 px-3" style="border-radius: 4px;">Manga</a></li>
       <!-- Agrega más elementos de menú según sea necesario -->
     </ul>
-    <p class="menu-label">Opciones</p>
-    <ul class="menu-list">
-      <li><a href="#">Perfil</a></li>
-      <li><a href="#">Configuración</a></li>
-      <li><a href="#">Salir</a></li>
+    <p class="title is-3 has-text-centered text-white py-1">Opciones</p>
+    <ul class="menu-list" style="background-color: #c954d6; border-radius: 5px; padding: 1rem;">
+      <li><a href="#" class="has-text-dark has-background-purple is-size-6 has-text-weight-bold py-2 px-3" style="border-radius: 4px;">Perfil</a></li>
+      <li><a href="#" class="has-text-dark has-background-purple is-size-6 has-text-weight-bold py-2 px-3" style="border-radius: 4px;">Configuración</a></li>
+      <li><a href="#" class="has-text-dark has-background-purple is-size-6 has-text-weight-bold py-2 px-3" style="border-radius: 4px;">Salir</a></li>
       <!-- Agrega más elementos de menú según sea necesario -->
     </ul>
   </aside>
@@ -67,7 +70,7 @@
   <div class="col-md-9">
     <div class="banner banner-cover">
       <div class="banner-container">
-        <h1 class="title-cover">AVE</h1>
+        <h1 class="title is-3 has-text-centered text-white py-1">¡Ve los nuevos lanzamientos!</h1>
         <img
           src="{% static 'img/banner.png' %}"
           alt="Item-1n"
@@ -78,15 +81,7 @@
   </div>
 </div>
 
-<!-- Banner -->
-<div class="banner banner-cover">
-  <div class="banner-container">
-    <h1 class="title-cover">¡New!</h1>
-    <a class="btn btn-default">Comics, Mangas y productos referidos</a>
-  </div>
-</div>
-
-<!-- Barra de navegación secundaria -->
+<!-- Barra de navegación secundaria
 <div class="container">
   <nav class="nav">
     <a class="nav-item active has-text-weight-semibold" href="#">Comics</a>
@@ -95,175 +90,9 @@
     <a class="nav-item has-text-weight-semibold" href="#">Ofertas</a>
     <a class="nav-item has-text-weight-semibold" href="#">Muy pronto</a>
   </nav>
-</div>
-<!-- Sección de fotografías -->
-<div class="container">
-  <div class="columns is-multiline">
-    <div class="column is-full-mobile">
-      <div class="columns is-centered is-mobile is-multiline">
-        <!-- 1 Sección de fotografías -->
-        <div class="column is-half column-full">
-          <div class="card">
-            <span class="price">Bs89.99</span>
-            <a href="#" class="c_m_home">
-                <img src="{% static 'img/item-1n.png' %}" alt="Item-1n" />
-            </a>
-            <div class="card-info">
-              <h4 class="has-text-black has-text-centered has-text-weight-bold">
-                Women's Burnt Orange Casual TEE Bs89.99
-              </h4>
-              <p class="has-text-centered">
-                Classic casual t-shirt for women on the move. 100% cotton.
-              </p>
-              <div class="card-buttons">
-                <a href="#" class="btn btn--mini-rounded"
-                  ><i class="zmdi zmdi-shopping-cart"></i
-                ></a>
-                <a href="#" class="btn btn--mini-rounded"
-                  ><i class="zmdi zmdi-favorite-outline"></i
-                ></a>
-                <a href="producto.html" class="btn btn--mini-rounded"
-                  ><i class="zmdi zmdi-eye"></i
-                ></a>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="column column-full is-half">
-          <div class="card">
-            <span class="price">Bs47.50</span>
-            <img src="{% static 'img/item-2n.png' %}" alt="Item-2n" />
-            <div class="card-info">
-              <h4 class="has-text-black has-text-centered has-text-weight-bold">
-                Women's Burnt Orenge Casual TEE Bs47.50
-              </h4>
-              <p class="has-text-centered">
-                Classic casual t-shirt for women on the move. 100% cotton.
-              </p>
-              <div class="card-buttons">
-                <a href="#" class="btn btn--mini-rounded"
-                  ><i class="zmdi zmdi-shopping-cart"></i
-                ></a>
-                <a href="#" class="btn btn--mini-rounded"
-                  ><i class="zmdi zmdi-favorite-outline"></i
-                ></a>
-                <a href="producto.html" class="btn btn--mini-rounded"
-                  ><i class="zmdi zmdi-eye"></i
-                ></a>
-              </div>
-            </div>
-          </div>
-        </div>
+</div> -->
 
-        <div class="column is-full">
-          <div class="card">
-            <span class="price">Bs65.95</span>
-
-            <img src="{% static 'img/item-3n.png' %}" alt="Item-3n" />
-            <div class="card-info">
-              <h4 class="has-text-black has-text-centered has-text-weight-bold">
-                Women's Burnt Orenge Casual TEE Bs65.95
-              </h4>
-              <p class="has-text-centered">
-                Classic casual t-shirt for women on the move. 100% cotton.
-              </p>
-              <div class="card-buttons">
-                <a href="#" class="btn btn--mini-rounded"
-                  ><i class="zmdi zmdi-shopping-cart"></i
-                ></a>
-                <a href="#" class="btn btn--mini-rounded"
-                  ><i class="zmdi zmdi-favorite-outline"></i
-                ></a>
-                <a href="producto.html" class="btn btn--mini-rounded"
-                  ><i class="zmdi zmdi-eye"></i
-                ></a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Segunda sección de fotografías -->
-    <div class="column is-half is-full-mobile">
-      <div class="columns is-mobile is-multiline">
-        <div class="column is-full">
-          <div class="card">
-            <span class="price"><strike>Bs107</strike> Bs89.99</span>
-            <img src="{% static 'img/item-4n.png' %}" alt="Item-4n" />
-            <div class="card-info">
-              <h4 class="has-text-black has-text-centered has-text-weight-bold">
-                Women's Burnt Orenge Casual TEE Bs89.99
-              </h4>
-              <p class="has-text-centered">
-                Classic casual t-shirt for women on the move. 100% cotton.
-              </p>
-              <div class="card-buttons">
-                <a href="#" class="btn btn--mini-rounded"
-                  ><i class="zmdi zmdi-shopping-cart"></i
-                ></a>
-                <a href="#" class="btn btn--mini-rounded"
-                  ><i class="zmdi zmdi-favorite-outline"></i
-                ></a>
-                <a href="producto.html" class="btn btn--mini-rounded"
-                  ><i class="zmdi zmdi-eye"></i
-                ></a>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="column column-full is-half">
-          <div class="card">
-            <span class="price">Bs29.99</span>
-            <img src="{% static 'img/item-5n.png' %}" alt="Item-5n" />
-            <div class="card-info">
-              <h4 class="has-text-black has-text-centered has-text-weight-bold">
-                Women's Burnt Orenge Casual TEE Bs29.99
-              </h4>
-              <p class="has-text-centered">
-                Classic casual t-shirt for women on the move. 100% cotton.
-              </p>
-              <div class="card-buttons">
-                <a href="#" class="btn btn--mini-rounded"
-                  ><i class="zmdi zmdi-shopping-cart"></i
-                ></a>
-                <a href="#" class="btn btn--mini-rounded"
-                  ><i class="zmdi zmdi-favorite-outline"></i
-                ></a>
-                <a href="producto.html" class="btn btn--mini-rounded"
-                  ><i class="zmdi zmdi-eye"></i
-                ></a>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="column column-full is-half">
-          <div class="card">
-            <span class="price">Bs34.79</span>
-            <img src="{% static 'img/item-6n.png' %}" alt="Item-6n" />
-            <div class="card-info">
-              <h4 class="has-text-black has-text-centered has-text-weight-bold">
-                Oshi no Ko Casual TEE $34.79
-              </h4>
-              <p class="has-text-centered">Manga Clasico Popular</p>
-              <div class="card-buttons">
-                <a href="#" class="btn btn--mini-rounded"
-                  ><i class="zmdi zmdi-shopping-cart"></i
-                ></a>
-                <a href="#" class="btn btn--mini-rounded"
-                  ><i class="zmdi zmdi-favorite-outline"></i
-                ></a>
-                <a href="producto.html" class="btn btn--mini-rounded"
-                  ><i class="zmdi zmdi-eye"></i
-                ></a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-<div class="container container-full">
+<!--<div class="container container-full"> #Esto es sector de 3 personas aun no utilizado
   <div class="columns is-centered is-multiline">
     <div class="column is-full">
       <div class="separator"></div>
@@ -296,30 +125,112 @@
       </div>
     </div>
   </div>
-</div>
+</div>-->
 <!-- Agregar un modal personalizado para el mensaje de inicio de sesión -->
 <div id="mensaje" style="display: none;">
     Debes iniciar sesión para acceder al contenido.
 </div>
-<script>
-    // Obtener todas las imágenes con la clase 'c_m_home'
-    const cMHomeImgs = document.querySelectorAll('.c_m_home');
 
-    // Iterar sobre cada imagen y agregar un event listener
-    cMHomeImgs.forEach(img => {
-        img.addEventListener('click', () => {
-            // Verificar si el usuario está autenticado
-            const isAuthenticated = true; // Aquí debes poner tu lógica de autenticación
+<div class="comic-manga-list row">
+  <h1 class="title is-1 has-text-centered text-white py-5">Cómics y Mangas Populares Según las Votaciones de los demás Usuarios</h1>
+  {% for comic_manga in comics_mangas %}
+<div class="comic-manga-item col-md-4 mb-4">
+  <div class="card">
+    
+      <a {% if user.is_authenticated %} href="{% url 'comics_mangas_detail' comic_manga.id %}" {% else %} href="{% url 'signin_new' %}" {% endif %}>
+          <img class="card-img-top fixed-height-img" src="{{ comic_manga.cover_img.url }}" alt="{{ comic_manga.title }}">
+      </a>
+      <div class="card-body">
+          <h5 class="title is-5">{{ comic_manga.title }}</h5>
+          <p class="card-text">Editorial: {{ comic_manga.publisher.description }}</p>
+          <p class="has-text-weight-bold">Precio: {{ comic_manga.price_bs }} Bs</p>
+          <p>Calificación Promedio: {{ comic_manga.average_rating|default:"No Ratings" }}</p>
+          <p>Número de Calificaciones: {{ comic_manga.ratings_count }}</p>
+          <!-- Verificar si el producto está en stock -->
+          {% if comic_manga.stock > 0 %}
+              <!-- Verificar si el producto está en el carrito -->
+              {% if comic_manga.id in cart_item_ids %}
+                  <button class="button is-dark" disabled>
+                      <span class="is-small"><i class="fa fa-cart-plus"></i></span>
+                      <span>Añadido</span>
+                  </button>
+              {% else %}
+                  <button id="add-to-cart-btn-{{ comic_manga.id }}" class="button is-dark add-to-cart-btn" onclick="addToCart('{{ comic_manga.id }}', this)">
+                      <span class="icon is-small"><i class="fa fa-cart-plus"></i></span>
+                      <span>Añadir a carrito</span>
+                  </button>
+              {% endif %}
+          {% else %}
+          <button class="button is-danger is-outlined" disabled>
+              <span class="icon is-small"><i class="fas fa-cart-plus"></i></span>
+              <span>¡AGOTADO!</span>
+          </button>
+          {% endif %}
+          {% if user.is_authenticated %}
+          <a href="{% url 'comics_mangas_detail' comic_manga.id %}" class="button is-info">
+              <span>Detalles</span>
+          </a>
+          {% else %}
+          <button class="button is-info" data-bs-toggle="modal" data-bs-target="#Model">
+              <span>Detalles</span>
+          </button>
+          {% endif %}
+      </div>
+  </div>
+</div>
+{% endfor %}
+</div>
 
-            // Si el usuario no está autenticado, mostrar el mensaje
-            if (!isAuthenticated) {
-                document.getElementById('mensaje').style.display = 'block';
-            } else {
-                // Aquí puedes redirigir al usuario a la página de inicio de sesión si prefieres
-                // window.location.href = '/signin/';
-            }
-        });
-    });
-</script>
-
+<!-- Sección de comics y mangas Pupulares -->
+<!--<main class="container py"></main>
+  <section class="section">
+    <h1 class="title is-1 has-text-centered text-white py-5">Cómics y Mangas Populares Según las Votaciones de los demás Usuarios</h1>
+    <div class="columns is-multiline">
+      {% for comic_manga in comics_mangas %}
+      <div class="column is-4-desktop is-6-tablet is-full-mobile mb-4">
+        <div class="card">
+          <a {% if user.is_authenticated %} href="{% url 'comics_mangas_detail' comic_manga.id %}" {% else %} href="{% url 'signin_new' %}" {% endif %}>
+            <img class="card-img-top" src="{{ comic_manga.cover_img.url }}" alt="{{ comic_manga.title }}">
+          </a>
+          <div class="card-content">
+            <h5 class="title is-5">{{ comic_manga.title }}</h5>
+            <p class="subtitle is-6">Editorial: {{ comic_manga.publisher.description }}</p>
+            <p class="has-text-weight-bold">Precio: {{ comic_manga.price_bs }} Bs</p>
+            <p>Calificación Promedio: {{ comic_manga.average_rating|default:"No Ratings" }}</p>
+            <p>Número de Calificaciones: {{ comic_manga.ratings_count }}</p>
+            
+            {% if comic_manga.stock > 0 %}
+                {% if comic_manga.id in cart_item_ids %}
+                    <button class="button is-dark" disabled>
+                        <span class="icon is-small"><i class="fa fa-cart-plus"></i></span>
+                        <span>Añadido</span>
+                    </button>
+                {% else %}
+                    <button id="add-to-cart-btn-{{ comic_manga.id }}" class="button is-dark add-to-cart-btn" onclick="addToCart('{{ comic_manga.id }}', this)">
+                        <span class="icon is-small"><i class="fa fa-cart-plus"></i></span>
+                        <span>Añadir a carrito</span>
+                    </button>
+                {% endif %}
+            {% else %}
+                <button class="button is-danger is-outlined" disabled>
+                    <span class="icon is-small"><i class="fas fa-cart-plus"></i></span>
+                    <span>¡AGOTADO!</span>
+                </button>
+            {% endif %}
+            {% if user.is_authenticated %}
+              <a href="{% url 'comics_mangas_detail' comic_manga.id %}" class="button is-info">
+                  <span>Detalles</span>
+              </a>
+            {% else %}
+              <button class="button is-info" data-bs-toggle="modal" data-bs-target="#Model">
+                  <span>Detalles</span>
+              </button>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+</main>-->
 {% endblock %}

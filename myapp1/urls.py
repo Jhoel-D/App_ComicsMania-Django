@@ -45,7 +45,7 @@ urlpatterns = [
     path('decrease_quantity/<int:item_id>/', views.decrease_quantity, name='decrease_quantity'),
     path('clear_cart/', views.clear_cart, name='clear_cart'),
     
-    path('cart_pay', views.cart_pay, name='cart_pay'),
+    path('recommender/', views.recommender, name='recommender'),
     #Para order
     path('create_order/', views.create_order, name='create_order'),  # URL para crear una orden
     path('orders/', views.order_list, name='order_list'),            # URL para listar órdenes

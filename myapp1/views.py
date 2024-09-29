@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST, require_http_methods
 from django.http import JsonResponse
 from django.contrib import messages
+from django.db.models import Count, Avg
 
 
 from django.http import HttpResponseRedirect, HttpResponse
@@ -17,15 +18,194 @@ from paypalcheckoutsdk.orders import OrdersCreateRequest
 from paypalcheckoutsdk.core import PayPalHttpClient, SandboxEnvironment, LiveEnvironment
 
 import json
-from django.http.response import JsonResponse        
+from django.http.response import JsonResponse      
+
+from surprise import Dataset, Reader, KNNBasic
+from surprise.model_selection import train_test_split
+import pandas as pd  
+
+
+###########
+def home(request):
+    # Obtener los cómics/mangas más populares según el número de calificaciones
+    popular_comics = (
+        ComicsMangas.objects
+        .annotate(
+            ratings_count=Count('rating'),  # Cuenta el número de ratings
+            average_rating=Avg('rating__value')  # Calcula la calificación promedio
+        )
+        .filter(ratings_count__gt=0)  # Asegúrate de que haya al menos una calificación
+        .order_by('-ratings_count')[:10]  # Limitar a los 10 más populares
+    )
+
+    recommendations = []
+    if request.user.is_authenticated:
+        # Entrenar el modelo y obtener recomendaciones para el usuario autenticado
+        model = train_model()
+        recommendations = get_user_based_recommendations(request.user.id, model)
+
+    return render(request, 'home.html', {
+        'comics_mangas': popular_comics,
+        'recommendations': recommendations
+    })
+
+#############
 def hola(request):
     return render(request, template_name= 'paypal.html') 
     
-def cart_pay(request, total_price):
-   pass
 
+#
+def get_ratings():
+    # Obtener las calificaciones desde la base de datos
+    ratings = Rating.objects.values('user_id', 'product_id', 'value')
+    return ratings
+
+def create_rating_dataframe():
+    # Crear un DataFrame a partir de las calificaciones obtenidas
+    ratings = get_ratings()
+    return pd.DataFrame(ratings)
+
+def train_model(): #Basado en user_based
+    # Crear el DataFrame de calificaciones y entrenar el modelo de recomendación
+    ratings_df = create_rating_dataframe()
+    
+    reader = Reader(rating_scale=(1, 10))
+    data = Dataset.load_from_df(ratings_df[['user_id', 'product_id', 'value']], reader)
+    
+    trainset, _ = train_test_split(data, test_size=0.2)
+    
+    # Entrenar el modelo utilizando KNN básico con similitud basada en el usuario
+    model = KNNBasic(sim_options={'name': 'cosine', 'user_based': True})
+    model.fit(trainset)
+    
+    return model
+def train_item_based_model():
+    ratings_df = create_rating_dataframe()
+    reader = Reader(rating_scale=(1, 10))
+    data = Dataset.load_from_df(ratings_df[['user_id', 'product_id', 'value']], reader)
+
+    trainset = data.build_full_trainset()  # Usar todo el conjunto de datos para el entrenamiento
+    model = KNNBasic(sim_options={'name': 'cosine', 'user_based': False})
+    model.fit(trainset)
+    return model
+
+
+def get_user_based_recommendations(user_id, model, n=10):
+    # Obtener todos los cómics/mangas disponibles en la base de datos
+    all_items = ComicsMangas.objects.values_list('id', flat=True)
+
+    # Obtener los cómics/mangas calificados por el usuario
+    user_items = Rating.objects.filter(user_id=user_id).values_list('product_id', flat=True)
+
+    # Filtrar los cómics/mangas que el usuario no ha calificado
+    unseen_items = [item for item in all_items if item not in user_items]
+
+    # Ajustar n si hay menos ítems no vistos que el número de recomendaciones deseadas
+    if len(unseen_items) < n:  
+        n = len(unseen_items)  
+
+    recommendations = []
+
+    try:
+        # Generar predicciones para los cómics/mangas no vistos
+        predictions = [model.predict(user_id, item) for item in unseen_items]
+        recommendations = sorted(predictions, key=lambda x: x.est, reverse=True)[:n]
+    except IndexError as e:
+        print(f"IndexError: {e}")  # Imprimir el error en la consola
+        return []  # Retornar una lista vacía si ocurre un error
+
+    # Obtener los IDs de los productos recomendados
+    recommended_product_ids = [pred.iid for pred in recommendations]
+
+    # Recuperar los objetos ComicsMangas correspondientes a los IDs recomendados
+    recommended_comics = ComicsMangas.objects.filter(id__in=recommended_product_ids)
+
+    return recommended_comics
+
+def get_item_based_recommendations(user_id, model, n=5):
+    # Obtener los ítems calificados por el usuario
+    user_items = Rating.objects.filter(user_id=user_id).values_list('product_id', flat=True)
+
+    if not user_items:
+        return []  # Retornar si el usuario no ha calificado ningún ítem
+
+    # Obtener todos los ítems disponibles en la base de datos
+    all_items = ComicsMangas.objects.values_list('id', flat=True)
+    # Filtrar los ítems que el usuario no ha calificado
+    unseen_items = [item for item in all_items if item not in user_items]
+
+    # Ajustar n si hay menos ítems no vistos que el número de recomendaciones deseadas
+    if len(unseen_items) < n:  
+        n = len(unseen_items)  
+
+    recommendations = []
+
+    try:
+        # Generar predicciones para los ítems no vistos
+        predictions = [model.predict(user_id, item) for item in unseen_items]
+        recommendations = sorted(predictions, key=lambda x: x.est, reverse=True)[:n]
+    except IndexError as e:
+        print(f"IndexError: {e}")  # Imprimir el error en la consola
+        return []  # Retornar una lista vacía si ocurre un error
+
+    # Obtener los IDs de los productos recomendados
+    recommended_product_ids = [pred.iid for pred in recommendations]
+    # Recuperar los objetos ComicsMangas correspondientes a los IDs recomendados
+    recommended_comics = ComicsMangas.objects.filter(id__in=recommended_product_ids)
+
+    return recommended_comics
+
+
+
+def recommender(request):
+    # Obtener los cómics/mangas más populares según el número de calificaciones
+    popular_comics = (
+        ComicsMangas.objects
+        .annotate(
+            ratings_count=Count('rating'),  # Cuenta el número de ratings
+            average_rating=Avg('rating__value')  # Calcula la calificación promedio
+        )
+        .filter(ratings_count__gt=0)  # Asegúrate de que haya al menos una calificación
+        .order_by('-ratings_count')[:10]  # Limitar a los 10 más populares
+    )
+
+    user_based_recommendations = []
+    item_based_recommendations = []
+    
+    if request.user.is_authenticated:
+        # Entrenar el modelo colaborativo basado en usuarios
+        user_model = train_model()
+        user_based_recommendations = get_user_based_recommendations(request.user.id, user_model)
+        
+        # Entrenar el modelo colaborativo basado en ítems
+        item_model = train_item_based_model()
+        item_based_recommendations = get_item_based_recommendations(request.user.id, item_model)
+
+    return render(request, 'recommender.html', {
+        'comics_mangas': popular_comics,
+        'user_based_recommendations': user_based_recommendations,
+        'item_based_recommendations': item_based_recommendations
+    })
+
+
+#
+
+#def home(request):
+    #return render(request, 'home.html')
 def home(request):
-    return render(request, 'home.html')
+    # Obtener los cómics/mangas más populares según el número de calificaciones
+    popular_comics = (
+        ComicsMangas.objects
+        .annotate(
+            ratings_count=Count('rating'),  # Cuenta el número de ratings
+            average_rating=Avg('rating__value')  # Calcula la calificación promedio
+        )
+        .filter(ratings_count__gt=0)  # Asegúrate de que haya al menos una calificación
+        .order_by('-ratings_count')  # Ordenar por la cantidad de calificaciones
+        [:10]  # Limitar a los 10 más populares
+    )
+
+    return render(request, 'home.html', {'comics_mangas': popular_comics})
 
 def cart_total(request):
     if request.user.is_authenticated:
@@ -606,3 +786,4 @@ def order_list(request, status=None):
 def orders_by_status(request, status):
     orders = Order.objects.filter(status=status)
     return render(request, 'order_list.html', {'orders': orders})
+    

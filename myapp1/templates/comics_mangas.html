@@ -5,7 +5,9 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"/>
 <link rel="stylesheet" href="{% static 'css/comics_mangas.css' %}" />
 
-<h1>Cómics y Mangas disponibles</h1>
+<h1 class="title is-1 has-text-centered text-center display-3 text-white py-5">
+    Cómics y Mangas disponible
+  </h1>
 <div class="comic-manga-list row">
     {% for comic_manga in comics_mangas %}
 <div class="comic-manga-item col-md-4 mb-4">
@@ -15,9 +17,9 @@
             <img class="card-img-top fixed-height-img" src="{{ comic_manga.cover_img.url }}" alt="{{ comic_manga.title }}">
         </a>
         <div class="card-body">
-            <h5 class="card-title">{{ comic_manga.title }}</h5>
+            <h5 class="title is-5">{{ comic_manga.title }}</h5>
             <p class="card-text">Editorial: {{ comic_manga.publisher.description }}</p>
-            <p class="card-text">Precio: {{ comic_manga.price_bs }} Bs</p>
+            <p class="has-text-weight-bold">Precio: {{ comic_manga.price_bs }} Bs</p>
             <!-- Verificar si el producto está en stock -->
             {% if comic_manga.stock > 0 %}
                 <!-- Verificar si el producto está en el carrito -->

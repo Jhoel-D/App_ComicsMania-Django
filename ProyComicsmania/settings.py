@@ -33,7 +33,7 @@ SECRET_KEY = 'django-insecure-dl1m$*ub$!#t(ljae#6tr4%d_vw_%-=-f(*8)0+t-swf*xrg=(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['ws6st5js-8000.brs.devtunnels.ms', 'localhost', '127.0.0.1'] #Para que puedan acceder a admin desde tunel
 
 
 # Application definition

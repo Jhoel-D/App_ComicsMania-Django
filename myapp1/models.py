@@ -47,13 +47,14 @@ class Categories(models.Model): #Categories
     category_type = models.ForeignKey(CategoryType, on_delete=models.CASCADE)
     def __str__(self):
         return self.description if self.description else "No description available"
+    
 class Author(models.Model):  # Autores
     name = models.CharField(max_length=100)
     def __str__(self):
         return self.name
 
 class ComicsMangas(models.Model): #Comics Manga
-    title = models.CharField(max_length=100, verbose_name="Title")
+    title = models.CharField(max_length=250, verbose_name="Title")
     publisher = models.ForeignKey(Publisher, on_delete=models.CASCADE)
     author = models.ManyToManyField(Author)  # Relación many-to-many con Author
     synopsis = models.TextField(max_length=800, null=True, verbose_name='Synopsis')

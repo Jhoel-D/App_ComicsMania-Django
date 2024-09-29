@@ -4,3 +4,12 @@ images
 api.py
 serializers.py
 urls2.py
+
+recommender.py
+steam-200k.csv
+u2.data
+Comic_Manga.csv
+
+ModuloRecom
+export
+

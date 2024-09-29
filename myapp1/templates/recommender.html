@@ -1,0 +1,199 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% block content %}
+{% csrf_token %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"/>
+<link rel="stylesheet" href="{% static 'css/comics_mangas.css' %}" />
+
+
+<h1 class="title is-1 has-text-centered text-center display-3 text-white py-5">
+    ¡Recomendados Para tí! - User-Based
+  </h1>
+  <!-- User Based Recommendations -->
+<div class="comic-manga-list row">
+    {% if user_based_recommendations  %}
+        {% for comic in user_based_recommendations  %}
+        <div class="comic-manga-item col-md-4 mb-4">
+            <div class="card">
+                <a {% if user.is_authenticated %} href="{% url 'comics_mangas_detail' comic.id %}" {% else %} href="{% url 'signin_new' %}" {% endif %}>
+                    <img class="card-img-top fixed-height-img" src="{{ comic.cover_img.url }}" alt="{{ comic.title }}">
+                </a>
+                <div class="card-body">
+                    <h5 class="title is-5">{{ comic.title }}</h5>
+                    <p class="card-text">Editorial: {{ comic.publisher.description }}</p>
+                    <p class="has-text-weight-bold">Precio: {{ comic.price_bs }} Bs</p>
+                    
+                    <!-- Verificar si el producto está en stock -->
+                    {% if comic.stock > 0 %}
+                        <!-- Verificar si el producto está en el carrito -->
+                        {% if comic.id in cart_item_ids %}
+                            <button class="button is-dark" disabled>
+                                <span class="is-small"><i class="fa fa-cart-plus"></i></span>
+                                <span>Añadido</span>
+                            </button>
+                        {% else %}
+                            <button id="add-to-cart-btn-{{ comic.id }}" class="button is-dark add-to-cart-btn" onclick="addToCart('{{ comic.id }}', this)">
+                                <span class="icon is-small"><i class="fa fa-cart-plus"></i></span>
+                                <span>Añadir a carrito</span>
+                            </button>
+                        {% endif %}
+                    {% else %}
+                        <button class="button is-danger is-outlined" disabled>
+                            <span class="icon is-small"><i class="fas fa-cart-plus"></i></span>
+                            <span>¡AGOTADO!</span>
+                        </button>
+                    {% endif %}
+                    
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'comics_mangas_detail' comic.id %}" class="button is-info">
+                            <span>Detalles</span>
+                        </a>
+                    {% else %}
+                        <button class="button is-info" data-bs-toggle="modal" data-bs-target="#Model">
+                            <span>Detalles</span>
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No hay recomendaciones disponibles.</p>
+    {% endif %}
+</div>
+<h1 class="title is-1 has-text-centered text-center display-3 text-white py-5">
+    ¡Recomendados Para tí! - Item-Based
+  </h1>
+<!-- Item Based Recommendations -->
+<div class="comic-manga-list row">
+    {% if item_based_recommendations  %}
+        {% for comic in item_based_recommendations  %}
+        <div class="comic-manga-item col-md-4 mb-4">
+            <div class="card">
+                <a {% if user.is_authenticated %} href="{% url 'comics_mangas_detail' comic.id %}" {% else %} href="{% url 'signin_new' %}" {% endif %}>
+                    <img class="card-img-top fixed-height-img" src="{{ comic.cover_img.url }}" alt="{{ comic.title }}">
+                </a>
+                <div class="card-body">
+                    <h5 class="title is-5">{{ comic.title }}</h5>
+                    <p class="card-text">Editorial: {{ comic.publisher.description }}</p>
+                    <p class="has-text-weight-bold">Precio: {{ comic.price_bs }} Bs</p>
+                    
+                    <!-- Verificar si el producto está en stock -->
+                    {% if comic.stock > 0 %}
+                        <!-- Verificar si el producto está en el carrito -->
+                        {% if comic.id in cart_item_ids %}
+                            <button class="button is-dark" disabled>
+                                <span class="is-small"><i class="fa fa-cart-plus"></i></span>
+                                <span>Añadido</span>
+                            </button>
+                        {% else %}
+                            <button id="add-to-cart-btn-{{ comic.id }}" class="button is-dark add-to-cart-btn" onclick="addToCart('{{ comic.id }}', this)">
+                                <span class="icon is-small"><i class="fa fa-cart-plus"></i></span>
+                                <span>Añadir a carrito</span>
+                            </button>
+                        {% endif %}
+                    {% else %}
+                        <button class="button is-danger is-outlined" disabled>
+                            <span class="icon is-small"><i class="fas fa-cart-plus"></i></span>
+                            <span>¡AGOTADO!</span>
+                        </button>
+                    {% endif %}
+                    
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'comics_mangas_detail' comic.id %}" class="button is-info">
+                            <span>Detalles</span>
+                        </a>
+                    {% else %}
+                        <button class="button is-info" data-bs-toggle="modal" data-bs-target="#Model">
+                            <span>Detalles</span>
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No hay recomendaciones disponibles.</p>
+    {% endif %}
+</div>
+
+<!-- Contenedor para el mensaje de agregado al carrito -->
+<div id="add-to-cart-message-container"></div>
+
+<script>
+    function addToCart(productId, button) {
+        const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+    
+        fetch("{% url 'add_to_cart_inline' 0 %}".replace('0', productId), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Ocultar el botón de "Añadir a carrito"
+                button.style.display = 'none';
+                // Crear un nuevo botón de "Añadido"
+                const addedButton = document.createElement('button');
+                addedButton.classList.add('button', 'is-dark');
+                addedButton.disabled = true;
+                addedButton.innerHTML = `
+                    <span class="is-small"><i class="fa fa-cart-plus"></i></span>
+                    <span>Añadido</span>
+                `;
+                button.parentNode.appendChild(addedButton);
+            } else {
+                console.error('Error al agregar al carrito:', data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error al agregar al carrito:', error);
+        });
+    }
+</script>
+
+<!-- Modal -->
+<div class="modal fade" id="Model" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style="z-index: 9999;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Fantasy ComicsMania</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                ¡PARA ACCEDER AL CONTENIDO DEBE INICIAR SESIÓN O REGISTRARSE!
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a href="{% url 'signin_new' %}" class="btn btn-primary">Signin</a>
+                <a href="{% url 'signup_new' %}" class="btn btn-primary">Signup</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+
+<!--
+<h1 class="title is-2 has-text-centered">Recomendaciones para Ti</h1>
+<div class="recommendations">
+    {% if recommendations %}
+        {% for comic in recommendations %}
+            <div class="comic-item">
+                <h2>{{ comic.title }}</h2>
+                <img src="{{ comic.cover_img.url }}" alt="{{ comic.title }}">
+                <p>{{ comic.synopsis|truncatewords:20 }}</p>
+                <p><strong>Precio: Bs.</strong> {{ comic.price_bs }}</p>
+                <p><strong>Género:</strong> {{ comic.genre }}</p>
+                <p><strong>Año de lanzamiento:</strong> {{ comic.year_of_release|date:"Y" }}</p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No hay recomendaciones disponibles.</p>
+    {% endif %}
+</div>
+-->
