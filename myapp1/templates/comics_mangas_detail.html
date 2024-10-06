@@ -134,79 +134,82 @@
   </form>
 </div>
 
- <!-- Caja de comentarios -->
- <div class="px-4 py-5 bg-dark text-light">
+<!-- Caja de comentarios -->
+<div class="px-4 py-5 bg-dark text-light">
   <h2 class="font-semibold has-text-white is-size-3">Reviews</h2>
   <div id="comment-container" class="columns is-multiline">
-    {% if comments %}
-      {% for comment in comments|slice:":2" %}
-      <div class="column is-half">
-          <div class="box">
-              <div class="text-muted">Published on: {{ comment.publication_date }}</div>
-              <div class="font-semibold">{{ comment.user.username }}</div>
-              {% if comment.user_rating %}
-              <div class="rating">
-                  {% for _ in rating_values|slice:comment.user_rating.value %}
-                  <i class="fas fa-star text-warning"></i> <!-- Muestra las estrellas -->
-                  {% endfor %}
+      {% if comments %}
+          {% for comment in comments %}
+              <div class="column is-half">
+                  <div class="box">
+                      <div class="text-muted">Published on: {{ comment.publication_date }}</div>
+                      <div class="font-semibold">{{ comment.user.username }}</div>
+                      {% if comment.user_rating %}
+                          <div class="rating">
+                              {% for _ in rating_values|slice:comment.user_rating.value %}
+                                  <i class="fas fa-star text-warning"></i> <!-- Muestra las estrellas -->
+                              {% endfor %}
+                          </div>
+                      {% else %}
+                          <p>Rating: User did not rate this product</p>
+                      {% endif %}
+                      <p>{{ comment.review_comment }}</p>
+                  </div>
               </div>
-              {% else %}
-              <p>Rating: User did not rate this product</p>
-              {% endif %}
-              <p>{{ comment.review_comment }}</p>
-          </div>
-      </div>
-      {% endfor %}
-    {% else %}
-      <p>No comments yet.</p>
-    {% endif %}
+          {% endfor %}
+      {% else %}
+          <p>No comments yet.</p>
+      {% endif %}
   </div>
   <div id="load-more-container">
-    <button id="load-more-comments" class="button is-primary">Load more comments</button>
+      <button id="load-more-comments" class="button is-primary">Load more comments</button>
   </div>
 </div>
 
 <script>
   document.addEventListener("DOMContentLoaded", function() {
-    const loadMoreButton = document.getElementById("load-more-comments");
-    const commentContainer = document.getElementById("comment-container");
-    let nextIndex = 4; // Índice del siguiente comentario a cargar
+      const loadMoreButton = document.getElementById("load-more-comments");
+      const commentContainer = document.getElementById("comment-container");
+      let nextIndex = 0; // Índice del siguiente comentario a cargar
 
-    loadMoreButton.addEventListener("click", function() {
+      loadMoreButton.addEventListener("click", function() {
+          fetchMoreComments();
+      });
+
+      function fetchMoreComments() {
+          fetch("{% url 'load_more_comments' comic_manga_id=comic_manga.id %}?next_index=" + nextIndex)
+              .then(response => response.json())
+              .then(data => {
+                  if (data.comments.length > 0) {
+                      data.comments.forEach(comment => {
+                          const commentHtml = `
+                              <div class="column is-half">
+                                  <div class="box">
+                                      <div class="text-muted">Published on: ${comment.publication_date}</div>
+                                      <div class="font-semibold">${comment.user}</div>
+                                      ${comment.user_rating_value !== null && comment.user_rating_value !== undefined ? 
+                                          `<div class="rating">
+                                              ${Array(comment.user_rating_value).fill('<i class="fas fa-star text-warning"></i>').join('')}
+                                          </div>` : 
+                                          `<p>Rating: User did not rate this product</p>`}
+                                      <p>${comment.review_comment}</p>
+                                  </div>
+                              </div>`;
+                          commentContainer.insertAdjacentHTML('beforeend', commentHtml);
+                      });
+                      nextIndex += data.comments.length; // Actualizar el índice del siguiente comentario a cargar
+                  } else {
+                      loadMoreButton.style.display = "none"; // Ocultar el botón si no hay más comentarios
+                  }
+              })
+              .catch(error => console.error("Error fetching more comments:", error));
+      }
+
+      // Llamada inicial para cargar los primeros comentarios
       fetchMoreComments();
-    });
-
-    function fetchMoreComments() {
-      fetch("{% url 'load_more_comments' comic_manga_id=comic_manga.id %}?next_index=" + nextIndex)
-        .then(response => response.json())
-        .then(data => {
-          if (data.comments.length > 0) {
-            data.comments.forEach(comment => {
-              const commentHtml = `
-                <div class="column is-half">
-                  <div class="box">
-                    <div class="text-muted">Published on: ${comment.publication_date}</div>
-                    
-                    <div class="font-semibold">${comment.user}</div>
-                    ${comment.user_rating_value !== null && comment.user_rating_value !== undefined ? 
-                      `<div class="rating">
-                        ${Array(comment.user_rating_value).fill('<i class="fas fa-star text-warning"></i>').join('')}
-                      </div>` : `<p>Rating: User did not rate this product</p>`}
-                    <p>${comment.review_comment}</p>
-                  </div>
-                </div>`;
-              commentContainer.insertAdjacentHTML('beforeend', commentHtml);
-            });
-            nextIndex += data.comments.length; // Actualizar el índice del siguiente comentario a cargar
-          } else {
-            loadMoreButton.style.display = "none"; // Ocultar el botón si no hay más comentarios
-          }
-        })
-        .catch(error => console.error("Error fetching more comments:", error));
-    }
-    fetchMoreComments(); // Llamada inicial para cargar los primeros comentarios
   });
 </script>
+
 
 <!-- Contenedor para el mensaje de agregado al carrito -->
 <div id="add-to-cart-message-container"></div>
@@ -264,10 +267,6 @@
     </div>
   </form>
 </div>
-
-
-
-
 
   </div>
   

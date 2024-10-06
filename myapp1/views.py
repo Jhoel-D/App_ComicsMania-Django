@@ -26,6 +26,31 @@ import pandas as pd
 
 
 ###########
+def search(request):
+    query = request.GET.get('search', '')  # Obtener el término de búsqueda desde la consulta
+
+    # Buscar comics o mangas que coincidan con el término de búsqueda
+    results = ComicsMangas.objects.filter(title__icontains=query)
+
+    # Configurar la paginación (10 resultados por página)
+    paginator = Paginator(results, 30)  # Ajustar el número de ítems por página si es necesario
+    page_number = request.GET.get('page')  # Obtener el número de página desde la consulta GET
+    page_obj = paginator.get_page(page_number)  # Obtener los resultados paginados
+
+    context = {
+        'page_obj': page_obj,  # Pasar los resultados paginados
+        'search_query': query,  # Pasar el término de búsqueda
+    }
+
+    return render(request, 'search_results.html', context)
+
+def autocomplete_titles(request):
+    if 'term' in request.GET:
+        search_query = request.GET.get('term')
+        titles = ComicsMangas.objects.filter(title__icontains=search_query).values_list('title', flat=True)[:10]  # Limitar a 10 resultados
+        return JsonResponse(list(titles), safe=False)
+    return JsonResponse([], safe=False)
+
 def home(request):
     # Obtener los cómics/mangas más populares según el número de calificaciones
     popular_comics = (
@@ -483,29 +508,38 @@ def comics_mangas(request):
 
 @login_required
 def comics_mangas_detail(request, comic_manga_id):
-    if request.user.is_authenticated:
-        cart_item_ids = request.user.cartitem_set.values_list('comic_id', flat=True)
-    else:
-        cart_item_ids = []  # Si el usuario no está autenticado, establecer cart_item_ids como una lis
-        
-    comic_manga = get_object_or_404(ComicsMangas, pk=comic_manga_id) #Obtiene comic manga
-    user_rating = Rating.objects.filter(user=request.user, product=comic_manga).first()   # Obtener la calificación del usuario para este producto
-    rating_values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    comments = Comments.objects.filter(product=comic_manga, approved=True)  # Obtener la calificación del usuario para este producto
-    user_rating_value = user_rating.value if user_rating else None # Calificación del usuario (si existe)
-    for comment in comments:   # Asignar calificación de usuario a cada comentario
-        comment.user_rating = Rating.objects.filter(user=comment.user, product=comic_manga).first()
+    # Obtener IDs de los productos en el carrito
+    cart_item_ids = request.user.cartitem_set.values_list('comic_id', flat=True)
+    
+    # Obtener el cómic o manga
+    comic_manga = get_object_or_404(ComicsMangas, pk=comic_manga_id)
+
+    # Obtener la calificación del usuario para este producto
+    user_rating = Rating.objects.filter(user=request.user, product=comic_manga).first()
+    user_rating_value = user_rating.value if user_rating else None  # Calificación del usuario (si existe)
+
+    # Obtener todos los comentarios aprobados para este cómic o manga y ordenarlos
+    comments = Comments.objects.filter(product=comic_manga, approved=True).order_by('-publication_date')  # Asegúrate de ordenar
+
+    # Paginación: mostrar 5 comentarios por página
+    paginator = Paginator(comments, 2)  # Cambié a 5 por página
+    page_number = request.GET.get('page')  # Obtener el número de página de la consulta
+    page_comments = paginator.get_page(page_number)  # Obtener los comentarios para la página solicitada
+
     # Obtener los autores relacionados (porque ahora es una relación muchos a muchos)
     authors = comic_manga.author.all()
 
+    # Definir el contexto para la plantilla
     context = {
         'comic_manga': comic_manga,
-        'comments': comments,
+        'comments': page_comments,  # Usar los comentarios paginados
         'user_rating_value': user_rating_value,
-        'rating_values': rating_values,
+        'rating_values': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         'user_rating': user_rating,
         'cart_item_ids': cart_item_ids,
-        'authors': authors,}
+        'authors': authors,
+    }
+    
     return render(request, 'comics_mangas_detail.html', context)
 
 @login_required

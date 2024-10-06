@@ -1,65 +1,70 @@
 {% extends 'layouts/base.html' %}
 {% load static %}
+
 {% block content %}
-{% csrf_token %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"/>
 <link rel="stylesheet" href="{% static 'css/comics_mangas.css' %}" />
 
-<h1 class="title is-1 has-text-centered text-center display-3 text-white py-5">
-    Todos los Comics disponibles
-</h1>
-<div class="comic-manga-list columns is-multiline">
-    {% for comic_manga in comics_mangas %}
-        <!-- Filtrar y mostrar solo cómics con categoría del tipo "Comic" -->
-        <div class="comic-manga-item column is-12-mobile is-6-tablet is-3-desktop mb-4">
-            <div class="card">
-                <a {% if user.is_authenticated %} href="{% url 'comics_mangas_detail' comic_manga.id %}" {% else %} href="{% url 'signin_new' %}" {% endif %}>
-                    <img class="card-img-top fixed-height-img" src="{{ comic_manga.cover_img.url }}" alt="{{ comic_manga.title }}">
+<div class="container">
+  <h1 class="title is-1 has-text-centered text-center display-3 text-white py-5">Resultados de Búsqueda</h1>
+  
+  <!-- Mostrar resultados si los hay -->
+  {% if page_obj %}
+  <div class="container">
+    <div class="px-4 py-5 bg-dark text-white has-text-centered">
+        <span class="has-text-success is-size-4">
+            <i class="fas fa-check-circle"></i> Resultados para "{{ search_query }}"
+        </span>
+    </div>
+  </div>
+  
+  <div class="comic-manga-list columns is-multiline">
+    {% for comic_manga in page_obj %}
+    <div class="comic-manga-item column is-12-mobile is-6-tablet is-3-desktop mb-4">
+        <div class="card">
+            <a href="{% if user.is_authenticated %}{% url 'comics_mangas_detail' comic_manga.id %}{% else %}#{% endif %}" {% if not user.is_authenticated %} data-bs-toggle="modal" data-bs-target="#Model" {% endif %}>
+                <img class="card-img-top fixed-height-img" src="{{ comic_manga.cover_img.url }}" alt="{{ comic_manga.title }}">
+            </a>
+            <div class="card-body">
+                <h5 class="title is-5">{{ comic_manga.title }}</h5>
+                <p class="card-text">Editorial: {{ comic_manga.publisher.description }}</p>
+                <p class="has-text-weight-bold">Precio: {{ comic_manga.price_bs }} Bs</p>
+    
+                <!-- Verificar si el producto está en stock -->
+                {% if comic_manga.stock > 0 %}
+                    <!-- Botón Añadir a carrito -->
+                    {% if comic_manga.id in cart_item_ids %}
+                        <button class="button is-dark" disabled>
+                            <span class="is-small"><i class="fa fa-cart-plus"></i></span>
+                            <span>Añadido</span>
+                        </button>
+                    {% else %}
+                        <button id="add-to-cart-btn-{{ comic_manga.id }}" class="button is-dark add-to-cart-btn" onclick="addToCart('{{ comic_manga.id }}', this)">
+                            <span class="icon is-small"><i class="fa fa-cart-plus"></i></span>
+                            <span>Añadir a carrito</span>
+                        </button>
+                    {% endif %}
+                {% else %}
+                    <button class="button is-danger is-outlined" disabled>
+                        <span class="icon is-small"><i class="fas fa-cart-plus"></i></span>
+                        <span>¡AGOTADO!</span>
+                    </button>
+                {% endif %}
+                
+                <!-- Botón Detalles siempre visible -->
+                <a href="{% if user.is_authenticated %}{% url 'comics_mangas_detail' comic_manga.id %}{% else %}#{% endif %}"
+                   class="button is-info" {% if not user.is_authenticated %} data-bs-toggle="modal" data-bs-target="#Model" {% endif %}>
+                    <span>Detalles</span>
                 </a>
-                <div class="card-body">
-                    <h5 class="title is-5">{{ comic_manga.title }}</h5>
-                    <p class="card-text">Editorial: {{ comic_manga.publisher.description }}</p>
-                    <p class="has-text-weight-bold">Precio: {{ comic_manga.price_bs }} Bs</p>
-                    
-                    <!-- Verificar si el producto está en stock -->
-                    {% if comic_manga.stock > 0 %}
-                        <!-- Verificar si el producto está en el carrito -->
-                        {% if comic_manga.id in cart_item_ids %}
-                            <button class="button is-dark" disabled>
-                                <span class="is-small"><i class="fa fa-cart-plus"></i></span>
-                                <span>Añadido</span>
-                            </button>
-                        {% else %}
-                            <button id="add-to-cart-btn-{{ comic_manga.id }}" class="button is-dark add-to-cart-btn" onclick="addToCart('{{ comic_manga.id }}', this)">
-                                <span class="icon is-small"><i class="fa fa-cart-plus"></i></span>
-                                <span>Añadir a carrito</span>
-                            </button>
-                        {% endif %}
-                    {% else %}
-                        <button class="button is-danger is-outlined" disabled>
-                            <span class="icon is-small"><i class="fas fa-cart-plus"></i></span>
-                            <span>¡AGOTADO!</span>
-                        </button>
-                    {% endif %}
-                    
-                    {% if user.is_authenticated %}
-                        <a href="{% url 'comics_mangas_detail' comic_manga.id %}" class="button is-info">
-                            <span>Detalles</span>
-                        </a>
-                    {% else %}
-                        <button class="button is-info" data-bs-toggle="modal" data-bs-target="#Model">
-                            <span>Detalles</span>
-                        </button>
-                    {% endif %}
-                </div>
             </div>
         </div>
+    </div>
+    
     {% endfor %}
-</div>
+  </div>
 
-<!-- Navegación de paginación -->
-<nav class="pagination is-centered" role="navigation" aria-label="pagination">
-    <!-- Botón Anterior -->
+  <!-- Paginación -->
+  <nav class="pagination is-centered" role="navigation" aria-label="pagination">
     <div class="pagination-previous">
         {% if page_obj.has_previous %}
             <a class="pagination-previous button is-link is-light" href="?page={{ page_obj.previous_page_number }}">
@@ -71,18 +76,15 @@
             </a>
         {% endif %}
     </div>
-
-    <!-- Números de la paginacioón -->
+    
     <ul class="pagination-list">
         {% for num in page_obj.paginator.page_range %}
             <li>
                 {% if page_obj.number == num %}
-                    <!-- Página actual -->
                     <a class="pagination-link is-current button is-link" style="background-color: #3273dc; color: white;">
                         {{ num }}
                     </a>
                 {% else %}
-                    <!-- Otras páginas -->
                     <a class="pagination-link button is-light" href="?page={{ num }}" style="color: #3273dc; border: 1px solid #3273dc;">
                         {{ num }}
                     </a>
@@ -91,7 +93,6 @@
         {% endfor %}
     </ul>
 
-    <!-- Botón Siguiente -->
     <div class="pagination-next">
         {% if page_obj.has_next %}
             <a class="pagination-next button is-link is-light" href="?page={{ page_obj.next_page_number }}">
@@ -103,11 +104,24 @@
             </a>
         {% endif %}
     </div>
-</nav>
+  </nav>
+
+  <!-- Si no hay resultados -->
+  {% else %}
+  <div class="container">
+    <div class="px-4 py-5 bg-dark text-white has-text-centered">
+        <span class="has-text-danger is-size-4">
+            <i class="fas fa-exclamation-circle"></i> No se encontraron resultados para "{{ search_query }}"
+        </span>
+    </div>
+  </div>
+  {% endif %}
+</div>
 
 <!-- Contenedor para el mensaje de agregado al carrito -->
 <div id="add-to-cart-message-container"></div>
 
+<!-- Script para agregar al carrito -->
 <script>
     function addToCart(productId, button) {
         const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
@@ -143,7 +157,7 @@
     }
 </script>
 
-<!-- Modal -->
+<!-- Modal para solicitar inicio de sesión -->
 <div class="modal fade" id="Model" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style="z-index: 9999;">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -162,4 +176,5 @@
         </div>
     </div>
 </div>
+
 {% endblock %}

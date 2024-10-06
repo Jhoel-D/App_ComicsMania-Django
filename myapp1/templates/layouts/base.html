@@ -159,17 +159,101 @@
               
             </ul>
             
-            <form class="d-flex" role="search">
+
+            <form class="d-flex position-relative" role="search" method="GET" action="{% url 'search' %}">
               <input
-                class="form-control me-2"
-                type="search"
-                placeholder="Search"
-                aria-label="Search"
+                  id="search-input"
+                  class="form-control me-2"
+                  type="search"
+                  name="search" 
+                  placeholder="Buscar por título"
+                  aria-label="Search"
+                  autocomplete="off"
               />
-              <button class="btn btn-outline-success" type="submit">
-                Search
-              </button>
-            </form>
+              <button class="btn btn-outline-success" type="submit">Search</button>
+          
+              <!-- Contenedor para las sugerencias -->
+              <ul id="suggestions-list" class="list-group position-absolute" style="top: 100%; left: 0; width: 100%; z-index: 1000; display: none;"></ul>
+          </form>
+          
+          <!-- Script para manejar el autocompletado -->
+          <script>
+              document.addEventListener("DOMContentLoaded", function() {
+                  const searchInput = document.getElementById('search-input');
+                  const suggestionsList = document.getElementById('suggestions-list');
+          
+                  searchInput.addEventListener('input', function() {
+                      const query = searchInput.value;
+          
+                      if (query.length > 1) {
+                          fetch(`/autocomplete_titles/?term=${query}`)
+                          .then(response => response.json())
+                          .then(data => {
+                              // Limpiar las sugerencias anteriores
+                              suggestionsList.innerHTML = '';
+          
+                              // Añadir las nuevas sugerencias
+                              data.forEach(title => {
+                                  const suggestionItem = document.createElement('li');
+                                  suggestionItem.classList.add('list-group-item', 'is-clickable');
+                                  suggestionItem.textContent = title;
+          
+                                  // Cuando se hace clic en una sugerencia, completar el campo de búsqueda
+                                  suggestionItem.addEventListener('click', function() {
+                                      searchInput.value = title;
+                                      suggestionsList.innerHTML = '';  // Limpiar las sugerencias al seleccionar
+                                  });
+          
+                                  suggestionsList.appendChild(suggestionItem);
+                              });
+          
+                              // Mostrar las sugerencias solo si hay resultados
+                              if (data.length > 0) {
+                                  suggestionsList.style.display = 'block'; // Mostrar la lista de sugerencias
+                              } else {
+                                  suggestionsList.style.display = 'none'; // Ocultar si no hay resultados
+                              }
+                          })
+                          .catch(error => {
+                              console.error('Error fetching autocomplete suggestions:', error);
+                          });
+                      } else {
+                          suggestionsList.innerHTML = '';  // Limpiar si no hay suficiente texto
+                          suggestionsList.style.display = 'none'; // Ocultar la lista de sugerencias
+                      }
+                  });
+          
+                  // Ocultar sugerencias cuando se pierde el foco
+                  searchInput.addEventListener('blur', function() {
+                      setTimeout(() => {
+                          suggestionsList.innerHTML = '';
+                          suggestionsList.style.display = 'none'; // Ocultar la lista de sugerencias
+                      }, 100); // Retraso para permitir el clic en la sugerencia
+                  });
+              });
+          </script>
+          
+          <style>
+              /* Estilo para la lista de sugerencias */
+              #suggestions-list {
+                  max-height: 200px; /* Altura máxima para las sugerencias */
+                  overflow-y: auto; /* Habilitar desplazamiento vertical */
+                  background-color: white; /* Fondo blanco para las sugerencias */
+                  border: 1px solid #dbdbdb; /* Bordes del menú */
+                  border-radius: 4px; /* Bordes redondeados */
+                  display: none; /* Ocultar por defecto */
+                  margin-top: 0.5rem; /* Espacio entre el input y la lista de sugerencias */
+              }
+          
+              .list-group-item {
+                  cursor: pointer; /* Cambiar cursor al pasar el mouse */
+              }
+          
+              .list-group-item:hover {
+                  background-color: #f5f5f5; /* Color de fondo al pasar el mouse */
+              }
+          </style>
+
           </div>
         </div>
       </nav>

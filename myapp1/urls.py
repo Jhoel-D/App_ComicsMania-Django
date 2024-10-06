@@ -32,7 +32,11 @@ urlpatterns = [
     path('comics_mangas/<int:comic_manga_id>/add_comment/', views.add_comment, name='add_comment'),
     path('load_more_comments/<int:comic_manga_id>/', views.load_more_comments, name='load_more_comments'),
     
-
+    
+    
+    path('search/', views.search, name='search'),  # Define la URL para la búsqueda
+    path('autocomplete_titles/', views.autocomplete_titles, name='autocomplete_titles'),
+    
     #Carrito
     path('add_to_cart/', views.add_to_cart , name= 'add_to_cart'),
     
@@ -61,6 +65,7 @@ urlpatterns = [
     path('mangas_view/', views.mangas_view, name= 'mangas_view'),
     
     path('get_cart_total/', views.get_cart_total, name='get_cart_total'),
+    
     #path('payment_confirmation/<int:order_id>/', views.payment_confirmation, name='payment_confirmation'),
     
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

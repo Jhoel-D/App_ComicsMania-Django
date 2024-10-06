@@ -44,7 +44,21 @@ class PublisherAdmin(admin.ModelAdmin):
 admin.site.register(Publisher, PublisherAdmin)
 
 #Registrar Cemetaries
-admin.site.register(Comments)
+class CommentsAdmin(admin.ModelAdmin):
+    # Habilitar búsqueda por el nombre de usuario y el título del producto
+    search_fields = ['user__username', 'product__title', 'review_comment']  # Permitir búsqueda por nombre de usuario y título del producto
+
+    # Filtros para la barra lateral
+    #list_filter = ['user', 'product', 'approved', 'publication_date']  # Filtrar por usuario, producto, aprobado y fecha de publicación
+
+    # Campos a mostrar en la lista principal
+    list_display = ['user', 'product', 'review_comment', 'publication_date', 'approved']  # Campos que se mostrarán en la lista
+
+    # Número de elementos por página
+    list_per_page = 100  # Configura cuántos ítems se mostrarán por página
+
+# Registrar el modelo Comments con el admin personalizado
+admin.site.register(Comments, CommentsAdmin)
 
 # Registrar el modelo Rating con el admin personalizado
 class RatingAdmin(admin.ModelAdmin):
