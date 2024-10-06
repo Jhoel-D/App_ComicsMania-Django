@@ -57,9 +57,8 @@ urlpatterns = [
     
     path('order/<int:order_id>/cancel/', views.cancel_order, name='cancel_order'),
     
-    path('prueba/', views.hola, name= 'prueba'),
-    
-  
+    path('comics_view/', views.comics_view, name= 'comics_view'),
+    path('mangas_view/', views.mangas_view, name= 'mangas_view'),
     
     path('get_cart_total/', views.get_cart_total, name='get_cart_total'),
     #path('payment_confirmation/<int:order_id>/', views.payment_confirmation, name='payment_confirmation'),

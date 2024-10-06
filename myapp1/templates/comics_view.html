@@ -6,54 +6,56 @@
 <link rel="stylesheet" href="{% static 'css/comics_mangas.css' %}" />
 
 <h1 class="title is-1 has-text-centered text-center display-3 text-white py-5">
-    Cómics y Mangas disponibles
+    Todos los Comics disponibles
 </h1>
 <div class="comic-manga-list columns is-multiline">
     {% for comic_manga in comics_mangas %}
-    <div class="comic-manga-item column is-12-mobile is-6-tablet is-3-desktop mb-4">
-        <div class="card">
-            <a {% if user.is_authenticated %} href="{% url 'comics_mangas_detail' comic_manga.id %}" {% else %} href="{% url 'signin_new' %}" {% endif %}>
-                <img class="card-img-top fixed-height-img" src="{{ comic_manga.cover_img.url }}" alt="{{ comic_manga.title }}">
-            </a>
-            <div class="card-body">
-                <h5 class="title is-5">{{ comic_manga.title }}</h5>
-                <p class="card-text">Editorial: {{ comic_manga.publisher.description }}</p>
-                <p class="has-text-weight-bold">Precio: {{ comic_manga.price_bs }} Bs</p>
-                <!-- Verificar si el producto está en stock -->
-                {% if comic_manga.stock > 0 %}
-                    <!-- Verificar si el producto está en el carrito -->
-                    {% if comic_manga.id in cart_item_ids %}
-                        <button class="button is-dark" disabled>
-                            <span class="is-small"><i class="fa fa-cart-plus"></i></span>
-                            <span>Añadido</span>
-                        </button>
+        <!-- Filtrar y mostrar solo cómics con categoría del tipo "Comic" -->
+        <div class="comic-manga-item column is-12-mobile is-6-tablet is-3-desktop mb-4">
+            <div class="card">
+                <a {% if user.is_authenticated %} href="{% url 'comics_mangas_detail' comic_manga.id %}" {% else %} href="{% url 'signin_new' %}" {% endif %}>
+                    <img class="card-img-top fixed-height-img" src="{{ comic_manga.cover_img.url }}" alt="{{ comic_manga.title }}">
+                </a>
+                <div class="card-body">
+                    <h5 class="title is-5">{{ comic_manga.title }}</h5>
+                    <p class="card-text">Editorial: {{ comic_manga.publisher.description }}</p>
+                    <p class="has-text-weight-bold">Precio: {{ comic_manga.price_bs }} Bs</p>
+                    
+                    <!-- Verificar si el producto está en stock -->
+                    {% if comic_manga.stock > 0 %}
+                        <!-- Verificar si el producto está en el carrito -->
+                        {% if comic_manga.id in cart_item_ids %}
+                            <button class="button is-dark" disabled>
+                                <span class="is-small"><i class="fa fa-cart-plus"></i></span>
+                                <span>Añadido</span>
+                            </button>
+                        {% else %}
+                            <button id="add-to-cart-btn-{{ comic_manga.id }}" class="button is-dark add-to-cart-btn" onclick="addToCart('{{ comic_manga.id }}', this)">
+                                <span class="icon is-small"><i class="fa fa-cart-plus"></i></span>
+                                <span>Añadir a carrito</span>
+                            </button>
+                        {% endif %}
                     {% else %}
-                        <button id="add-to-cart-btn-{{ comic_manga.id }}" class="button is-dark add-to-cart-btn" onclick="addToCart('{{ comic_manga.id }}', this)">
-                            <span class="icon is-small"><i class="fa fa-cart-plus"></i></span>
-                            <span>Añadir a carrito</span>
+                        <button class="button is-danger is-outlined" disabled>
+                            <span class="icon is-small"><i class="fas fa-cart-plus"></i></span>
+                            <span>¡AGOTADO!</span>
                         </button>
                     {% endif %}
-                {% else %}
-                    <button class="button is-danger is-outlined" disabled>
-                        <span class="icon is-small"><i class="fas fa-cart-plus"></i></span>
-                        <span>¡AGOTADO!</span>
-                    </button>
-                {% endif %}
-                {% if user.is_authenticated %}
-                <a href="{% url 'comics_mangas_detail' comic_manga.id %}" class="button is-info">
-                    <span>Detalles</span>
-                </a>
-                {% else %}
-                <button class="button is-info" data-bs-toggle="modal" data-bs-target="#Model">
-                    <span>Detalles</span>
-                </button>
-                {% endif %}
+                    
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'comics_mangas_detail' comic_manga.id %}" class="button is-info">
+                            <span>Detalles</span>
+                        </a>
+                    {% else %}
+                        <button class="button is-info" data-bs-toggle="modal" data-bs-target="#Model">
+                            <span>Detalles</span>
+                        </button>
+                    {% endif %}
+                </div>
             </div>
         </div>
-    </div>
     {% endfor %}
 </div>
-
 
 <!-- Navegación de paginación -->
 <nav class="pagination is-centered" role="navigation" aria-label="pagination">
@@ -103,14 +105,13 @@
     </div>
 </nav>
 
-
 <!-- Contenedor para el mensaje de agregado al carrito -->
 <div id="add-to-cart-message-container"></div>
 
 <script>
     function addToCart(productId, button) {
         const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
-    
+
         fetch("{% url 'add_to_cart_inline' 0 %}".replace('0', productId), {
             method: 'POST',
             headers: {
@@ -140,25 +141,25 @@
             console.error('Error al agregar al carrito:', error);
         });
     }
-    </script>
-<!-- Modal -->
+</script>
 
+<!-- Modal -->
 <div class="modal fade" id="Model" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style="z-index: 9999;">
     <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h1 class="modal-title fs-5" id="exampleModalLabel">Fantasy ComicsMania</h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Fantasy ComicsMania</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                ¡PARA ACCEDER AL CONTENIDO DEBE INICIAR SESIÓN O REGISTRARSE!
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a href="{% url 'signin_new' %}" class="btn btn-primary">Signin</a>
+                <a href="{% url 'signup_new' %}" class="btn btn-primary">Signup</a>
+            </div>
         </div>
-        <div class="modal-body">
-          ¡PARA ACCEDER AL CONTENIDO DEBE INICIAR SESIÓN O REGISTRARSE!
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <a href="{% url 'signin_new' %}" class="btn btn-primary">Signin</a>
-          <a href="{% url 'signup_new' %}" class="btn btn-primary">Signup</a>
-        </div>
-      </div>
     </div>
-  </div>
+</div>
 {% endblock %}

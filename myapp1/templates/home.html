@@ -134,7 +134,7 @@
 <div class="comic-manga-list row">
   <h1 class="title is-1 has-text-centered text-white py-5">Cómics y Mangas Populares Según las Votaciones de los demás Usuarios</h1>
   {% for comic_manga in comics_mangas %}
-<div class="comic-manga-item col-md-4 mb-4">
+<div class="comic-manga-item col-md-3 mb-3">
   <div class="card">
     
       <a {% if user.is_authenticated %} href="{% url 'comics_mangas_detail' comic_manga.id %}" {% else %} href="{% url 'signin_new' %}" {% endif %}>

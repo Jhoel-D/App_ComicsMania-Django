@@ -3,14 +3,14 @@ from django.contrib.auth.forms import CustomUserCreationForm, AuthenticationForm
 from django.contrib.auth import login, logout, authenticate
 from django.db import IntegrityError, transaction
 from .forms import TaskForm, CommentForm
-from .models import Task, ComicsMangas,Rating, Comments, CartItem, Order, ItemsOrder
+from .models import Task, ComicsMangas,Rating, Comments, CartItem, Order, ItemsOrder, Categories
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST, require_http_methods
 from django.http import JsonResponse
 from django.contrib import messages
 from django.db.models import Count, Avg
-
+from django.core.paginator import Paginator # Para paginar el llamado de comics/mangas
 
 from django.http import HttpResponseRedirect, HttpResponse
 from django.conf import settings
@@ -50,11 +50,63 @@ def home(request):
     })
 
 #############
-def hola(request):
-    return render(request, template_name= 'paypal.html') 
+
+    
+def comics_view(request):
+    # Filtrar cómics/mangas que tengan al menos una categoría de tipo "Comic"
+    comics_mangas = ComicsMangas.objects.filter(category__category_type__description="Comic").distinct()
+
+    # Verificar si el usuario está autenticado para obtener los ítems del carrito
+    if request.user.is_authenticated:
+        cart_item_ids = request.user.cartitem_set.values_list('comic_id', flat=True)
+    else:
+        cart_item_ids = []  # Si no está autenticado, lista vacía
+
+    # Implementación de la paginación: 20 productos por página
+    paginator = Paginator(comics_mangas, 20)
+    
+    # Obtener el número de página desde la solicitud GET
+    page_number = request.GET.get('page')
+    
+    # Obtener los objetos de la página actual
+    page_obj = paginator.get_page(page_number)
+
+    # Renderizar el template, pasando los objetos paginados
+    return render(request, 'comics_view.html', {
+        'comics_mangas': page_obj.object_list,  # Productos de la página actual
+        'page_obj': page_obj,  # Información de la paginación
+        'cart_item_ids': cart_item_ids  # Ítems del carrito
+    })
     
 
+def mangas_view(request):
+    # Filtrar cómics/mangas que tengan al menos una categoría de tipo "Manga"
+    mangas = ComicsMangas.objects.filter(category__category_type__description="Manga").distinct()
+
+    # Verificar si el usuario está autenticado para obtener los ítems del carrito
+    if request.user.is_authenticated:
+        cart_item_ids = request.user.cartitem_set.values_list('comic_id', flat=True)
+    else:
+        cart_item_ids = []  # Si no está autenticado, lista vacía
+
+    # Implementación de la paginación: 20 productos por página
+    paginator = Paginator(mangas, 20)
+    
+    # Obtener el número de página desde la solicitud GET
+    page_number = request.GET.get('page')
+    
+    # Obtener los objetos de la página actual
+    page_obj = paginator.get_page(page_number)
+
+    # Renderizar el template, pasando los objetos paginados
+    return render(request, 'mangas_view.html', {
+        'mangas': page_obj.object_list,  # Productos de la página actual
+        'page_obj': page_obj,  # Información de la paginación
+        'cart_item_ids': cart_item_ids  # Ítems del carrito
+    })
 #
+
+
 def get_ratings():
     # Obtener las calificaciones desde la base de datos
     ratings = Rating.objects.values('user_id', 'product_id', 'value')
@@ -154,7 +206,6 @@ def get_item_based_recommendations(user_id, model, n=5):
     recommended_comics = ComicsMangas.objects.filter(id__in=recommended_product_ids)
 
     return recommended_comics
-
 
 
 def recommender(request):
@@ -405,13 +456,30 @@ def add_to_cart(request):
     return render(request, 'add_to_cart.html')
 
 def comics_mangas(request):
+    # Obtener todos los cómics/mangas
     comics_mangas = ComicsMangas.objects.all()
+    
+    # Verificar si el usuario está autenticado para obtener los ítems del carrito
     if request.user.is_authenticated:
         cart_item_ids = request.user.cartitem_set.values_list('comic_id', flat=True)
     else:
-        cart_item_ids = []  # Si el usuario no está autenticado, establecer cart_item_ids como una lista vacía
+        cart_item_ids = []  # Si no está autenticado, lista vacía
 
-    return render(request, 'comics_mangas.html', {'comics_mangas': comics_mangas, 'cart_item_ids': cart_item_ids})
+    # Implementación de la paginación: 10 productos por página
+    paginator = Paginator(comics_mangas, 20)  # Mostramos 20 productos por página
+    
+    # Obtener el número de página desde la solicitud GET
+    page_number = request.GET.get('page')
+    
+    # Obtener los objetos de la página actual
+    page_obj = paginator.get_page(page_number)
+
+    # Renderizar el template, pasando los objetos paginados
+    return render(request, 'comics_mangas.html', {
+        'comics_mangas': page_obj.object_list,  # Productos de la página actual
+        'page_obj': page_obj,  # Información de la paginación
+        'cart_item_ids': cart_item_ids  # Ítems del carrito
+    })
 
 @login_required
 def comics_mangas_detail(request, comic_manga_id):

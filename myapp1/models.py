@@ -1,5 +1,6 @@
 
 from django.contrib.auth.models import User
+from django.contrib import admin #Para usar filtros en admin
 from django.db import models  # Importa models de Django
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db.models.signals import pre_delete
@@ -74,8 +75,9 @@ class ComicsMangas(models.Model): #Comics Manga
     cover_img = models.ImageField(upload_to='images/', verbose_name='Image', null=True)
     
     def __str__(self):
-        fila = f"Title: {self.title} - by: {self.author} - Stock: {self.stock}"
-        return fila
+        autores = ", ".join([autor.name for autor in self.author.all()])
+       
+        return f"Title: {self.title} - by: {autores} - Stock: {self.stock}"
     def delete(self, using=None, keep_parents=False):
         self.cover_img.storage.delete(self.cover_img.name)
         super().delete()

@@ -13,7 +13,7 @@
 <div class="comic-manga-list row">
     {% if user_based_recommendations  %}
         {% for comic in user_based_recommendations  %}
-        <div class="comic-manga-item col-md-4 mb-4">
+        <div class="comic-manga-item col-md-3 mb-3">
             <div class="card">
                 <a {% if user.is_authenticated %} href="{% url 'comics_mangas_detail' comic.id %}" {% else %} href="{% url 'signin_new' %}" {% endif %}>
                     <img class="card-img-top fixed-height-img" src="{{ comic.cover_img.url }}" alt="{{ comic.title }}">
@@ -68,7 +68,7 @@
 <div class="comic-manga-list row">
     {% if item_based_recommendations  %}
         {% for comic in item_based_recommendations  %}
-        <div class="comic-manga-item col-md-4 mb-4">
+        <div class="comic-manga-item col-md-3 mb-3">
             <div class="card">
                 <a {% if user.is_authenticated %} href="{% url 'comics_mangas_detail' comic.id %}" {% else %} href="{% url 'signin_new' %}" {% endif %}>
                     <img class="card-img-top fixed-height-img" src="{{ comic.cover_img.url }}" alt="{{ comic.title }}">

@@ -1,34 +1,37 @@
 {% extends 'layouts/base.html' %}
 {% load static %}
+
 {% block content %}
 {% csrf_token %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"/>
 <link rel="stylesheet" href="{% static 'css/comics_mangas.css' %}" />
 
 <h1 class="title is-1 has-text-centered text-center display-3 text-white py-5">
-    Cómics y Mangas disponibles
+    Todos los Mangas disponibles
 </h1>
+
 <div class="comic-manga-list columns is-multiline">
-    {% for comic_manga in comics_mangas %}
+    {% for manga in mangas %}
     <div class="comic-manga-item column is-12-mobile is-6-tablet is-3-desktop mb-4">
         <div class="card">
-            <a {% if user.is_authenticated %} href="{% url 'comics_mangas_detail' comic_manga.id %}" {% else %} href="{% url 'signin_new' %}" {% endif %}>
-                <img class="card-img-top fixed-height-img" src="{{ comic_manga.cover_img.url }}" alt="{{ comic_manga.title }}">
+            <a {% if user.is_authenticated %} href="{% url 'comics_mangas_detail' manga.id %}" {% else %} href="{% url 'signin_new' %}" {% endif %}>
+                <img class="card-img-top fixed-height-img" src="{{ manga.cover_img.url }}" alt="{{ manga.title }}">
             </a>
             <div class="card-body">
-                <h5 class="title is-5">{{ comic_manga.title }}</h5>
-                <p class="card-text">Editorial: {{ comic_manga.publisher.description }}</p>
-                <p class="has-text-weight-bold">Precio: {{ comic_manga.price_bs }} Bs</p>
+                <h5 class="title is-5">{{ manga.title }}</h5>
+                <p class="card-text">Editorial: {{ manga.publisher.description }}</p>
+                <p class="has-text-weight-bold">Precio: {{ manga.price_bs }} Bs</p>
+
                 <!-- Verificar si el producto está en stock -->
-                {% if comic_manga.stock > 0 %}
+                {% if manga.stock > 0 %}
                     <!-- Verificar si el producto está en el carrito -->
-                    {% if comic_manga.id in cart_item_ids %}
+                    {% if manga.id in cart_item_ids %}
                         <button class="button is-dark" disabled>
                             <span class="is-small"><i class="fa fa-cart-plus"></i></span>
                             <span>Añadido</span>
                         </button>
                     {% else %}
-                        <button id="add-to-cart-btn-{{ comic_manga.id }}" class="button is-dark add-to-cart-btn" onclick="addToCart('{{ comic_manga.id }}', this)">
+                        <button id="add-to-cart-btn-{{ manga.id }}" class="button is-dark add-to-cart-btn" onclick="addToCart('{{ manga.id }}', this)">
                             <span class="icon is-small"><i class="fa fa-cart-plus"></i></span>
                             <span>Añadir a carrito</span>
                         </button>
@@ -40,7 +43,7 @@
                     </button>
                 {% endif %}
                 {% if user.is_authenticated %}
-                <a href="{% url 'comics_mangas_detail' comic_manga.id %}" class="button is-info">
+                <a href="{% url 'comics_mangas_detail' manga.id %}" class="button is-info">
                     <span>Detalles</span>
                 </a>
                 {% else %}
@@ -54,10 +57,8 @@
     {% endfor %}
 </div>
 
-
 <!-- Navegación de paginación -->
 <nav class="pagination is-centered" role="navigation" aria-label="pagination">
-    <!-- Botón Anterior -->
     <div class="pagination-previous">
         {% if page_obj.has_previous %}
             <a class="pagination-previous button is-link is-light" href="?page={{ page_obj.previous_page_number }}">
@@ -70,17 +71,14 @@
         {% endif %}
     </div>
 
-    <!-- Números de la paginación -->
     <ul class="pagination-list">
         {% for num in page_obj.paginator.page_range %}
             <li>
                 {% if page_obj.number == num %}
-                    <!-- Página actual -->
                     <a class="pagination-link is-current button is-link" style="background-color: #3273dc; color: white;">
                         {{ num }}
                     </a>
                 {% else %}
-                    <!-- Otras páginas -->
                     <a class="pagination-link button is-light" href="?page={{ num }}" style="color: #3273dc; border: 1px solid #3273dc;">
                         {{ num }}
                     </a>
@@ -89,7 +87,6 @@
         {% endfor %}
     </ul>
 
-    <!-- Botón Siguiente -->
     <div class="pagination-next">
         {% if page_obj.has_next %}
             <a class="pagination-next button is-link is-light" href="?page={{ page_obj.next_page_number }}">
@@ -103,8 +100,6 @@
     </div>
 </nav>
 
-
-<!-- Contenedor para el mensaje de agregado al carrito -->
 <div id="add-to-cart-message-container"></div>
 
 <script>
@@ -121,9 +116,7 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Ocultar el botón de "Añadir a carrito"
                 button.style.display = 'none';
-                // Crear un nuevo botón de "Añadido"
                 const addedButton = document.createElement('button');
                 addedButton.classList.add('button', 'is-dark');
                 addedButton.disabled = true;
@@ -140,8 +133,7 @@
             console.error('Error al agregar al carrito:', error);
         });
     }
-    </script>
-<!-- Modal -->
+</script>
 
 <div class="modal fade" id="Model" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style="z-index: 9999;">
     <div class="modal-dialog modal-dialog-centered">
@@ -160,5 +152,5 @@
         </div>
       </div>
     </div>
-  </div>
+</div>
 {% endblock %}
