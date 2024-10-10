@@ -36,7 +36,10 @@ urlpatterns = [
     
     path('search/', views.search, name='search'),  # Define la URL para la búsqueda
     path('autocomplete_titles/', views.autocomplete_titles, name='autocomplete_titles'),
-    
+    #Url para mostrar categorías 
+    path('cat_filter/', views.cat_filter, name='cat_filter'),
+
+
     #Carrito
     path('add_to_cart/', views.add_to_cart , name= 'add_to_cart'),
     

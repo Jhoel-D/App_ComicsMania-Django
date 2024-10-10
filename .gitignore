@@ -1,4 +1,5 @@
 db.sqlite3
+
 images
 
 api.py
@@ -11,5 +12,9 @@ u2.data
 Comic_Manga.csv
 
 ModuloRecom
+.venv
+.vscode
+__pycache__
 export
+
 

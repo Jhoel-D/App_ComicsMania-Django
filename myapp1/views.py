@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import CustomUserCreationForm, AuthenticationForm #Añadido
 from django.contrib.auth import login, logout, authenticate
 from django.db import IntegrityError, transaction
-from .forms import TaskForm, CommentForm
-from .models import Task, ComicsMangas,Rating, Comments, CartItem, Order, ItemsOrder, Categories
+from .forms import TaskForm, CommentForm, FilterForm #Formularios
+from .models import Task, ComicsMangas,Rating, Comments, CartItem, Order, ItemsOrder, Categories, Genres
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST, require_http_methods
@@ -50,6 +50,36 @@ def autocomplete_titles(request):
         titles = ComicsMangas.objects.filter(title__icontains=search_query).values_list('title', flat=True)[:10]  # Limitar a 10 resultados
         return JsonResponse(list(titles), safe=False)
     return JsonResponse([], safe=False)
+
+#Mostrar por categoría filtro
+def cat_filter(request):
+    filter_form = FilterForm(request.GET or None)
+    comics_mangas = ComicsMangas.objects.all()
+
+    if filter_form.is_valid():
+        categories = filter_form.cleaned_data.get('category')
+        if categories:
+            comics_mangas = comics_mangas.filter(category__in=categories)
+
+        publisher = filter_form.cleaned_data.get('publisher')
+        if publisher:
+            comics_mangas = comics_mangas.filter(publisher=publisher)
+
+        genre = filter_form.cleaned_data.get('genre')
+        if genre:
+            comics_mangas = comics_mangas.filter(genre=genre)
+
+    # Paginación
+    paginator = Paginator(comics_mangas, 48)  # 12 productos por página
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'page_obj': page_obj,  # Asegúrate de que estás pasando page_obj, no comics_mangas
+        'filter_form': filter_form,
+    }
+
+    return render(request, 'cat_filter.html', context)
 
 def home(request):
     # Obtener los cómics/mangas más populares según el número de calificaciones
@@ -149,7 +179,7 @@ def train_model(): #Basado en user_based
     reader = Reader(rating_scale=(1, 10))
     data = Dataset.load_from_df(ratings_df[['user_id', 'product_id', 'value']], reader)
     
-    trainset, _ = train_test_split(data, test_size=0.2)
+    trainset, _ = train_test_split(data, test_size=0.1)
     
     # Entrenar el modelo utilizando KNN básico con similitud basada en el usuario
     model = KNNBasic(sim_options={'name': 'cosine', 'user_based': True})
@@ -165,8 +195,6 @@ def train_item_based_model():
     model = KNNBasic(sim_options={'name': 'cosine', 'user_based': False})
     model.fit(trainset)
     return model
-
-
 def get_user_based_recommendations(user_id, model, n=10):
     # Obtener todos los cómics/mangas disponibles en la base de datos
     all_items = ComicsMangas.objects.values_list('id', flat=True)
@@ -175,7 +203,9 @@ def get_user_based_recommendations(user_id, model, n=10):
     user_items = Rating.objects.filter(user_id=user_id).values_list('product_id', flat=True)
 
     # Filtrar los cómics/mangas que el usuario no ha calificado
-    unseen_items = [item for item in all_items if item not in user_items]
+    #unseen_items = [item for item in all_items if item not in user_items]
+    unseen_items = ComicsMangas.objects.exclude(id__in=user_items).values_list('id', flat=True)
+
 
     # Ajustar n si hay menos ítems no vistos que el número de recomendaciones deseadas
     if len(unseen_items) < n:  
@@ -186,10 +216,17 @@ def get_user_based_recommendations(user_id, model, n=10):
     try:
         # Generar predicciones para los cómics/mangas no vistos
         predictions = [model.predict(user_id, item) for item in unseen_items]
+
+        # Asegurarse de que las predicciones estén ordenadas de mayor a menor según el valor estimado (est)
         recommendations = sorted(predictions, key=lambda x: x.est, reverse=True)[:n]
     except IndexError as e:
         print(f"IndexError: {e}")  # Imprimir el error en la consola
         return []  # Retornar una lista vacía si ocurre un error
+
+    # Verificar que se hayan generado recomendaciones
+    if not recommendations:
+        print("No se generaron recomendaciones.")
+        return []
 
     # Obtener los IDs de los productos recomendados
     recommended_product_ids = [pred.iid for pred in recommendations]
@@ -199,7 +236,7 @@ def get_user_based_recommendations(user_id, model, n=10):
 
     return recommended_comics
 
-def get_item_based_recommendations(user_id, model, n=5):
+def get_item_based_recommendations(user_id, model, n=12):
     # Obtener los ítems calificados por el usuario
     user_items = Rating.objects.filter(user_id=user_id).values_list('product_id', flat=True)
 
@@ -209,7 +246,9 @@ def get_item_based_recommendations(user_id, model, n=5):
     # Obtener todos los ítems disponibles en la base de datos
     all_items = ComicsMangas.objects.values_list('id', flat=True)
     # Filtrar los ítems que el usuario no ha calificado
-    unseen_items = [item for item in all_items if item not in user_items]
+    #unseen_items = [item for item in all_items if item not in user_items]
+    unseen_items = ComicsMangas.objects.exclude(id__in=user_items).values_list('id', flat=True)
+
 
     # Ajustar n si hay menos ítems no vistos que el número de recomendaciones deseadas
     if len(unseen_items) < n:  
@@ -231,7 +270,6 @@ def get_item_based_recommendations(user_id, model, n=5):
     recommended_comics = ComicsMangas.objects.filter(id__in=recommended_product_ids)
 
     return recommended_comics
-
 
 def recommender(request):
     # Obtener los cómics/mangas más populares según el número de calificaciones
@@ -262,8 +300,6 @@ def recommender(request):
         'user_based_recommendations': user_based_recommendations,
         'item_based_recommendations': item_based_recommendations
     })
-
-
 #
 
 #def home(request):

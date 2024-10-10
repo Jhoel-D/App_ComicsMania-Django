@@ -122,24 +122,64 @@
               </li>
 
               <li class="nav-item dropdown">
-                <a
-                  class="nav-link dropdown-toggle"
-                  href="#"
-                  role="button"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
-                  Categorías
+                <a class="nav-link dropdown-toggle" href="/cat_filter/" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Categorías
                 </a>
                 <ul class="dropdown-menu">
-                  <li><a class="dropdown-item" href="#">Action</a></li>
-                  <li><a class="dropdown-item" href="/comics_mangas/">Another action</a></li>
-                  <li><hr class="dropdown-divider" /></li>
-                  <li>
-                    <a class="dropdown-item" href="/comics_mangas/">Ver Todo</a>
-                  </li>
+                    <li>
+                        <a class="dropdown-item" href="/cat_filter/" id="comic-category-toggle">Cómic</a>
+                        <ul class="dropdown-menu" id="comic-categories" style="display: none;"></ul> <!-- Submenú para categorías de cómic -->
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#" id="manga-category-toggle">Manga</a>
+                        <ul class="dropdown-menu" id="manga-categories" style="display: none;"></ul> <!-- Submenú para categorías de manga -->
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#" id="general-category-toggle">General</a>
+                        <ul class="dropdown-menu" id="general-categories" style="display: none;"></ul> <!-- Submenú para categorías generales -->
+                    </li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li>
+                        <a class="dropdown-item" href="/comics_mangas/">Ver Todo</a>
+                    </li>
                 </ul>
-              </li>
+            </li>
+            
+            
+            <script>
+              document.addEventListener("DOMContentLoaded", function() {
+                  const comicCategoriesContainer = document.getElementById('comic-categories');
+                  const mangaCategoriesContainer = document.getElementById('manga-categories');
+                  const generalCategoriesContainer = document.getElementById('general-categories');
+              
+                  // Función para cargar las categorías
+                  function loadCategories(container, categoryTypeId) {
+                      fetch(`/categories/${categoryTypeId}/`)
+                          .then(response => response.json())
+                          .then(data => {
+                              container.innerHTML = '';  // Limpiar las categorías anteriores
+                              data.forEach(category => {
+                                  const categoryItem = document.createElement('li');
+                                  categoryItem.innerHTML = `<a class="dropdown-item" href="/comics_mangas_by_category/${category.id}/">${category.description}</a>`;
+                                  container.appendChild(categoryItem);
+                              });
+                          })
+                          .catch(error => console.error('Error al cargar categorías:', error));
+                  }
+              
+                  // Cargar categorías al hacer clic en los menús desplegables
+                  document.querySelector('a[href="#"]').addEventListener('click', function(event) {
+                      event.preventDefault();  // Evitar el comportamiento por defecto
+                      loadCategories(comicCategoriesContainer, 1);  // Cargar categorías de cómic
+                      loadCategories(mangaCategoriesContainer, 2);  // Cargar categorías de manga
+                      loadCategories(generalCategoriesContainer, 3);  // Cargar categorías generales
+                  });
+              });
+              </script>
+              
+          
+          
+            
               <li class="nav-item">
                 <a class="nav-link disabled" aria-disabled="true">Disabled</a>
               </li>
@@ -258,10 +298,11 @@
         </div>
       </nav>
     </header>
-    
+  
     {% block content %}
     
     {% endblock %}
+  
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
   </body>

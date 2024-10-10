@@ -1,0 +1,187 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% block content %}
+{% csrf_token %}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"/>
+<link rel="stylesheet" href="{% static 'css/comics_mangas.css' %}" />
+<div class="columns">
+    <!-- Barra lateral de filtros -->
+    <div class="column is-2">
+        <aside class="menu" style="background-color: #f5f5f5; padding: 20px; border-radius: 5px; height: auto;">
+            <p class="menu-label">Filtros</p>
+            <form method="get" action="{% url 'cat_filter' %}">
+                <div class="field">
+                    <div class="control">
+                        <button class="button is-link is-fullwidth" type="submit">Aplicar Filtros</button>
+                    </div>
+                </div>
+    
+                <div class="field">
+                    <label class="label">Editorial</label>
+                    <div class="control">
+                        <div class="select is-fullwidth">
+                            {{ filter_form.publisher }}
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="field">
+                    <label class="label">Género</label>
+                    <div class="control">
+                        <div class="select is-fullwidth">
+                            {{ filter_form.genre }}
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="field">
+                    <label class="label">Categoría</label>
+                    <div class="control" style="max-height: 200px; overflow-y: auto;">
+                        <div class="select is-multiple is-fullwidth" style="height: auto;">
+                            {{ filter_form.category }}
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </aside>
+    </div>
+    
+
+    <!-- Contenido principal con los cómics y mangas filtrados -->
+    <div class="column is-9">
+        <div class="comic-manga-list columns is-multiline">
+            {% for comic_manga in page_obj %}
+
+                <div class="comic-manga-item column is-12-mobile is-6-tablet is-3-desktop mb-4">
+                    <div class="card">
+                        <a {% if user.is_authenticated %} href="{% url 'comics_mangas_detail' comic_manga.id %}" {% else %} href="{% url 'signin_new' %}" {% endif %}>
+                            <img class="card-img-top fixed-height-img" src="{{ comic_manga.cover_img.url }}" alt="{{ comic_manga.title }}">
+                        </a>
+                        <div class="card-body">
+                            <h5 class="title is-5">{{ comic_manga.title }}</h5>
+                            <p class="card-text">Editorial: {{ comic_manga.publisher.description }}</p>
+                            <p class="has-text-weight-bold">Precio: {{ comic_manga.price_bs }} Bs</p>
+                            {% if comic_manga.stock > 0 %}
+                                {% if comic_manga.id in cart_item_ids %}
+                                    <button class="button is-dark" disabled>
+                                        <span class="is-small"><i class="fa fa-cart-plus"></i></span>
+                                        <span>Añadido</span>
+                                    </button>
+                                {% else %}
+                                    <button id="add-to-cart-btn-{{ comic_manga.id }}" class="button is-dark add-to-cart-btn" onclick="addToCart('{{ comic_manga.id }}', this)">
+                                        <span class="icon is-small"><i class="fa fa-cart-plus"></i></span>
+                                        <span>Añadir a carrito</span>
+                                    </button>
+                                {% endif %}
+                            {% else %}
+                                <button class="button is-danger is-outlined" disabled>
+                                    <span class="icon is-small"><i class="fas fa-cart-plus"></i></span>
+                                    <span>¡AGOTADO!</span>
+                                </button>
+                            {% endif %}
+                            {% if user.is_authenticated %}
+                                <a href="{% url 'comics_mangas_detail' comic_manga.id %}" class="button is-info">
+                                    <span>Detalles</span>
+                                </a>
+                            {% else %}
+                                <button class="button is-info" data-bs-toggle="modal" data-bs-target="#Model">
+                                    <span>Detalles</span>
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Navegación de paginación -->
+        <nav class="pagination is-centered" role="navigation" aria-label="pagination">
+            <div class="pagination-previous">
+                {% if page_obj.has_previous %}
+                    <a class="pagination-previous button is-link is-light" href="?page={{ page_obj.previous_page_number }}&{{ request.GET.urlencode }}">
+                        << Anterior
+                    </a>
+                {% else %}
+                    <a class="pagination-previous button is-link is-light" disabled>
+                        << Anterior
+                    </a>
+                {% endif %}
+            </div>
+        
+            <ul class="pagination-list">
+                {% for num in page_obj.paginator.page_range %}
+                    <li>
+                        {% if page_obj.number == num %}
+                            <a class="pagination-link is-current button is-link" style="background-color: #3273dc; color: white;">
+                                {{ num }}
+                            </a>
+                        {% else %}
+                            <a class="pagination-link button is-light" href="?page={{ num }}&{{ request.GET.urlencode }}" style="color: #3273dc; border: 1px solid #3273dc;">
+                                {{ num }}
+                            </a>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        
+            <div class="pagination-next">
+                {% if page_obj.has_next %}
+                    <a class="pagination-next button is-link is-light" href="?page={{ page_obj.next_page_number }}&{{ request.GET.urlencode }}">
+                        Siguiente >>
+                    </a>
+                {% else %}
+                    <a class="pagination-next button is-link is-light" disabled>
+                        Siguiente >>
+                    </a>
+                {% endif %}
+            </div>
+        </nav>
+        
+        
+    </div>
+</div>
+
+<!-- Contenedor para el mensaje de agregado al carrito -->
+<div id="add-to-cart-message-container"></div>
+
+<script>
+    function addToCart(productId, button) {
+        const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+
+        fetch("{% url 'add_to_cart_inline' 0 %}".replace('0', productId), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Ocultar el botón de "Añadir a carrito"
+                button.style.display = 'none';
+                // Crear un nuevo botón de "Añadido"
+                const addedButton = document.createElement('button');
+                addedButton.classList.add('button', 'is-dark');
+                addedButton.disabled = true;
+                addedButton.innerHTML = `
+                    <span class="is-small"><i class="fa fa-cart-plus"></i></span>
+                    <span>Añadido</span>
+                `;
+                button.parentNode.appendChild(addedButton);
+                // Mostrar mensaje de agregado al carrito
+                const messageContainer = document.getElementById('add-to-cart-message-container');
+                messageContainer.innerHTML = '<p class="has-text-success">¡Producto añadido al carrito!</p>';
+                setTimeout(() => {
+                    messageContainer.innerHTML = ''; // Limpiar el mensaje después de un tiempo
+                }, 3000);
+            } else {
+                // Manejar el error si es necesario
+                alert('Error al añadir al carrito. Por favor, intenta de nuevo.');
+            }
+        });
+    }
+</script>
+
+{% endblock %}
