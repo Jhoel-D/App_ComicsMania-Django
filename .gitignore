@@ -5,6 +5,7 @@ images
 api.py
 serializers.py
 urls2.py
+tests.py
 
 recommender.py
 steam-200k.csv

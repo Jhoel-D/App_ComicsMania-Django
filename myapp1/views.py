@@ -51,7 +51,9 @@ def autocomplete_titles(request):
         return JsonResponse(list(titles), safe=False)
     return JsonResponse([], safe=False)
 
-#Mostrar por categoría filtro
+from django.core.paginator import Paginator
+
+# Mostrar por categoría filtro
 def cat_filter(request):
     filter_form = FilterForm(request.GET or None)
     comics_mangas = ComicsMangas.objects.all()
@@ -70,16 +72,23 @@ def cat_filter(request):
             comics_mangas = comics_mangas.filter(genre=genre)
 
     # Paginación
-    paginator = Paginator(comics_mangas, 48)  # 12 productos por página
+    paginator = Paginator(comics_mangas, 48)  # 48 productos por página
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
+    # Para mantener los filtros aplicados en la paginación
+    query_params = request.GET.copy()  # Hacer una copia de los parámetros GET
+    if 'page' in query_params:
+        query_params.pop('page')  # Remover el parámetro 'page', lo agregaremos al final
+
     context = {
-        'page_obj': page_obj,  # Asegúrate de que estás pasando page_obj, no comics_mangas
+        'page_obj': page_obj,
         'filter_form': filter_form,
+        'query_params': query_params.urlencode(),  # Codificar los parámetros de consulta
     }
 
     return render(request, 'cat_filter.html', context)
+
 
 def home(request):
     # Obtener los cómics/mangas más populares según el número de calificaciones

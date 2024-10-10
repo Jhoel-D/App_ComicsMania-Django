@@ -95,50 +95,49 @@
             {% endfor %}
         </div>
 
-        <!-- Navegación de paginación -->
-        <nav class="pagination is-centered" role="navigation" aria-label="pagination">
-            <div class="pagination-previous">
-                {% if page_obj.has_previous %}
-                    <a class="pagination-previous button is-link is-light" href="?page={{ page_obj.previous_page_number }}&{{ request.GET.urlencode }}">
-                        << Anterior
+<!-- Navegación de paginación -->
+<nav class="pagination is-centered" role="navigation" aria-label="pagination">
+    <div class="pagination-previous">
+        {% if page_obj.has_previous %}
+            <a class="pagination-previous button is-link is-light" href="?page={{ page_obj.previous_page_number }}&{{ query_params }}">
+                << Anterior
+            </a>
+        {% else %}
+            <a class="pagination-previous button is-link is-light" disabled>
+                << Anterior
+            </a>
+        {% endif %}
+    </div>
+
+    <ul class="pagination-list">
+        {% for num in page_obj.paginator.page_range %}
+            <li>
+                {% if page_obj.number == num %}
+                    <a class="pagination-link is-current button is-link" style="background-color: #3273dc; color: white;">
+                        {{ num }}
                     </a>
                 {% else %}
-                    <a class="pagination-previous button is-link is-light" disabled>
-                        << Anterior
+                    <a class="pagination-link button is-light" href="?page={{ num }}&{{ query_params }}" style="color: #3273dc; border: 1px solid #3273dc;">
+                        {{ num }}
                     </a>
                 {% endif %}
-            </div>
-        
-            <ul class="pagination-list">
-                {% for num in page_obj.paginator.page_range %}
-                    <li>
-                        {% if page_obj.number == num %}
-                            <a class="pagination-link is-current button is-link" style="background-color: #3273dc; color: white;">
-                                {{ num }}
-                            </a>
-                        {% else %}
-                            <a class="pagination-link button is-light" href="?page={{ num }}&{{ request.GET.urlencode }}" style="color: #3273dc; border: 1px solid #3273dc;">
-                                {{ num }}
-                            </a>
-                        {% endif %}
-                    </li>
-                {% endfor %}
-            </ul>
-        
-            <div class="pagination-next">
-                {% if page_obj.has_next %}
-                    <a class="pagination-next button is-link is-light" href="?page={{ page_obj.next_page_number }}&{{ request.GET.urlencode }}">
-                        Siguiente >>
-                    </a>
-                {% else %}
-                    <a class="pagination-next button is-link is-light" disabled>
-                        Siguiente >>
-                    </a>
-                {% endif %}
-            </div>
-        </nav>
-        
-        
+            </li>
+        {% endfor %}
+    </ul>
+
+    <div class="pagination-next">
+        {% if page_obj.has_next %}
+            <a class="pagination-next button is-link is-light" href="?page={{ page_obj.next_page_number }}&{{ query_params }}">
+                Siguiente >>
+            </a>
+        {% else %}
+            <a class="pagination-next button is-link is-light" disabled>
+                Siguiente >>
+            </a>
+        {% endif %}
+    </div>
+</nav>
+
     </div>
 </div>
 
