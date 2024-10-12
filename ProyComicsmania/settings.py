@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 #new import
 import os
+# Import dj-database-url at the beginning of the file.
+import dj_database_url
 
 
 PAYPAL_CLIENT_ID = 'ASN1mNwEDNB287Si0Ock9BSi8KWcMOk0ileCfImWBlekUoZGbgx0dcRt6LtJqtjlJeS2vXufxHVkAYIT'
@@ -28,13 +30,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-dl1m$*ub$!#t(ljae#6tr4%d_vw_%-=-f(*8)0+t-swf*xrg=('
+#SECRET_KEY = 'django-insecure-dl1m$*ub$!#t(ljae#6tr4%d_vw_%-=-f(*8)0+t-swf*xrg=('
+SECRET_KEY = os.environ.get('SECRET_KEY', default='your secret key')#Deploy
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+#DEBUG = True
+DEBUG = 'RENDER' not in os.environ
 
 ALLOWED_HOSTS = ['ws6st5js-8000.brs.devtunnels.ms', 'localhost', '127.0.0.1'] #Para que puedan acceder a admin desde tunel
-
+#Deploy
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
 # Application definition
 
@@ -52,6 +59,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',#Para deploy
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -86,15 +94,22 @@ WSGI_APPLICATION = 'ProyComicsmania.wsgi.application'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'base_datos_comicsmania',
-            'USER': 'root',
-            'PASSWORD': '',
-            'HOST': 'localhost',
-            'PORT': '3308',
+        # 'default': {
+            # 'ENGINE': 'django.db.backends.mysql',
+            # 'NAME': 'base_datos_comicsmania',
+            # 'USER': 'root',
+            # 'PASSWORD': '',
+            # 'HOST': 'localhost',
+            # 'PORT': '3308',
+            'default': dj_database_url.config(
+            # Replace this value with your local database's connection string.
+                #default='postgresql://postgres:postgres@localhost:5432/mysite',
+                default='mysql://root:@localhost:3308/base_datos_comicsmania',
+                conn_max_age=600
+                )
         }
-    }
+# Asegúrate de que el motor de base de datos esté correctamente definido
+#DATABASES['default']['ENGINE'] = 'django.db.backends.mysql'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -129,10 +144,19 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
-import os
+
 STATIC_URL = 'static/'
+#Deply
+# This production code might break development mode, so we check whether we're in DEBUG mode
+if not DEBUG:
+    # Tell Django to copy static assets into a path called `staticfiles` (this is specific to Render)
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    # Enable the WhiteNoise storage backend, which compresses static files to reduce disk use
+    # and renames the files with unique names for each version to support long-term caching
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+#
 STATICFILES_DIRS = [
-    BASE_DIR / "static",
+    #BASE_DIR / "static",
     #os.path.join(BASE_DIR, 'static'),
     os.path.join('myapp1/static'),
 ]

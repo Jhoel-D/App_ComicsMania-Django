@@ -1,4 +1,5 @@
-from . import views
+#from . import views
+from myapp1 import views
 from django.urls import path
 #for img
 from django.conf import settings
