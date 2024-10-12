@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.forms import CustomUserCreationForm, AuthenticationForm #Añadido
+from django.contrib.auth.forms import AuthenticationForm #Añadido
 from django.contrib.auth import login, logout, authenticate
 from django.db import IntegrityError, transaction
-from .forms import TaskForm, CommentForm, FilterForm #Formularios
+from .forms import TaskForm, CommentForm, FilterForm, CustomUserCreationForm #Formularios
 from .models import Task, ComicsMangas,Rating, Comments, CartItem, Order, ItemsOrder, Categories, Genres
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
@@ -351,98 +351,72 @@ def get_cart_total(request):
 def signup_new(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
-        if form.is_valid():
-            if form.cleaned_data['password1'] == form.cleaned_data['password2']:
-                try:
-                    user = form.save(commit=False)
-                    user.full_name = form.cleaned_data['full_name']
-                    user.birth_date = form.cleaned_data['birth_date']
-                    user.save()
-                    #login(request, user)
-                    return redirect('signin_new')
-                except IntegrityError:
-                    return render(request, 'signup_new.html', {'form': form, 'error': 'User already exists'})
-            else:
-                return render(request, 'signup_new.html', {'form': form, 'error': 'Passwords do not match'})
+        if form.is_valid():  # Verifica si el formulario es válido
+            try:
+                user = form.save()  # Guarda el usuario, maneja automáticamente las contraseñas
+                login(request, user)  # Inicia sesión al usuario
+                return redirect('signin_new')  # Redirige a la vista de inicio de sesión
+            except IntegrityError:
+                return render(request, 'signup_new.html', {'form': form, 'error': 'User already exists'})
+        else:
+            return render(request, 'signup_new.html', {'form': form, 'error': 'Error en el formulario'})
     else:
-        form = CustomUserCreationForm()
-    return render(request, 'signup_new.html', {'form': form})
-
-
+        form = CustomUserCreationForm()  # Crea una instancia vacía del formulario
+    return render(request, 'signup_new.html', {'form': form})  # Renderiza la plantilla de registro
 # Vista para el formulario de inicio de sesión
 def signin_new(request):
     if request.method == 'POST':
-        form = AuthenticationForm(request, request.POST)
-        if form.is_valid():
-            user = authenticate(username=form.cleaned_data['username'], password=form.cleaned_data['password'])
-            if user is not None:
-                login(request, user)
-                return redirect('comics_mangas')
+        form = AuthenticationForm(request, data=request.POST)  # Crea una instancia del formulario con los datos del POST
+        if form.is_valid():  # Verifica si el formulario es válido
+            user = form.get_user()  # Obtiene el usuario del formulario
+            login(request, user)  # Inicia sesión al usuario
+            return redirect('comics_mangas')  # Redirige a la vista de cómics y mangas
         else:
-            error_message = "Username or password is incorrect"
-            return render(request, 'signin_new.html', {'form': form, 'error_message': error_message})
+            return render(request, 'signin_new.html', {
+                'form': form,
+                'error_message': 'Username or password is incorrect'
+            })
     else:
-        form = AuthenticationForm()
-    return render(request, 'signin_new.html', {'form': form})
-
+        form = AuthenticationForm()  # Crea una instancia vacía del formulario
+    return render(request, 'signin_new.html', {'form': form})  # Renderiza la plantilla de inicio de sesión
 # Login de formulario
 def signup(request): 
-    if request.method == 'GET':
-        form = CustomUserCreationForm()  # Crea una instancia del formulario sin datos del usuario
-        return render(request, 'signup.html', {'form': form})
-    else: 
-        form = CustomUserCreationForm(request.POST)  # Crea una instancia del formulario con los datos del usuario
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)  # Crea una instancia del formulario con datos del usuario
         if form.is_valid():  # Verifica si el formulario es válido
-            if form.cleaned_data['password1'] == form.cleaned_data['password2']:  # Verifica si las contraseñas coinciden
-                try:
-                    # Registra el usuario
-                    user = form.save(commit=False)  # Guarda el usuario pero no lo persiste en la base de datos aún
-                    user.full_name = form.cleaned_data['full_name']  # Asigna el nombre completo del formulario al usuario
-                    user.birth_date = form.cleaned_data['birth_date']  # Asigna la fecha de nacimiento del formulario al usuario
-                    user.save()  # Ahora sí guarda el usuario con los campos adicionales
-                    login(request, user)
-                    #messages.success(request, '¡Usuario registrado correctamente! Bienvenido a nuestra plataforma.')
-                    return redirect('tasks')
-                except IntegrityError:
-                    #messages.success(request, 'User already exists')
-                    return render(request, 'signup.html', {
-                        'form': form,
-                        "error": 'User already exists'})
-            else:
+            try:
+                user = form.save()  # Guarda el usuario (esto ya maneja las contraseñas)
+                login(request, user)  # Inicia sesión al nuevo usuario
+                return redirect('tasks')  # Redirige a la vista de tareas
+            except IntegrityError:
                 return render(request, 'signup.html', {
                     'form': form,
-                    'error': 'Passwords do not match'})
+                    'error': 'User already exists'
+                })
         else:
-          # Si hay errores de validación, los pasamos al contexto para mostrarlos en la plantill
-          errors = form.errors.as_data()  # Obtener los errores del formulario
-          error_messages = []  # Lista para almacenar los mensajes de error
-          for field, field_errors in errors.items():  # Iterar sobre los errores de cada campo
-              for error in field_errors:  # Iterar sobre los errores asociados con cada campo
-                  error_messages.append(f"{field}: {error}")  # Agregar cada mensaje de error a la lista
-        #return render(request, 'signup.html', {'form': form, 'errors': error_messages, 'success_message': '¡Usuario registrado correctamente! Bienvenido a nuestra plataforma.'})
-
-        return render(request, 'signup.html', {'form': form, 'errors': form.errors})
-    
-# Iniciar Sesión
-def signin (request):
-    if request.method == 'GET':
-        return render(request, 'signin.html',{
-            'form': AuthenticationForm()})
-    else: 
-        user = authenticate(
-            request,
-            username=request.POST['username'],
-            password=request.POST['password'])
-        if user is None:
-            return render(request, 'signin.html',{
-            'form': AuthenticationForm,
-            'error': 'Username or password is incorrect'
+            return render(request, 'signup.html', {
+                'form': form,
+                'errors': form.errors  # Pasa los errores de validación al contexto
             })
-        else: 
-            
-            login(request, user)
-            return redirect('tasks')  
-        
+    else: 
+        form = CustomUserCreationForm()  # Crea una instancia vacía del formulario
+    return render(request, 'signup.html', {'form': form})  # Renderiza la plantilla de registro
+# Iniciar Sesión
+def signin(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)  # Crea una instancia del formulario con datos
+        if form.is_valid():
+            user = form.get_user()  # Obtiene el usuario del formulario
+            login(request, user)  # Inicia sesión al usuario
+            return redirect('tasks')  # Redirige a la vista de tareas
+        else:
+            return render(request, 'signin.html', {
+                'form': form,
+                'error': 'Username or password is incorrect'
+            })
+    else: 
+        form = AuthenticationForm()  # Crea una instancia vacía del formulario
+    return render(request, 'signin.html', {'form': form})  # Renderiza la plantilla de inicio de sesión    
 
 # Index de la pagina de tareas o comics 
 @login_required  
