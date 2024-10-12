@@ -5,12 +5,12 @@ images
 api.py
 serializers.py
 urls2.py
-tests.py
 
 recommender.py
 steam-200k.csv
 u2.data
 Comic_Manga.csv
+create_test_users.py
 
 ModuloRecom
 .venv

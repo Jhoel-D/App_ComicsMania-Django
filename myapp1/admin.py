@@ -4,6 +4,10 @@ from django.contrib.auth.models import User
 from .models import Task
 from .models import ComicsMangas, Comments, Categories, CategoryType, Genres, Publisher, Themes, Languages, Rating, CartItem, Order, ItemsOrder, Author
 
+#Poner header en admin
+admin.site.site_header = "Fantasy ComicsMania" #Poner Nombre Principal en el admin
+admin.site.index_title = "Administrador" #Poner Nombre de la sección
+admin.site.site_title = "Fantasy ComicsMania" #Poner Nombre de la página
 class UserAdmin(BaseUserAdmin):
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
