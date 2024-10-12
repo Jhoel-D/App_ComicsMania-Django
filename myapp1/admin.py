@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
 from .models import Task
-from .models import ComicsMangas, Comments, Categories, CategoryType, Genres, Publisher, Themes, Languages, Rating, CartItem, Order, ItemsOrder, Author
+from .models import ComicsMangas, Comments, Categories, CategoryType, Genres, Publisher, Themes, Languages, Rating, CartItem, Order, ItemsOrder, Author, CustomUser
 
 #Poner header en admin
 admin.site.site_header = "Fantasy ComicsMania" #Poner Nombre Principal en el admin
@@ -19,9 +19,9 @@ class UserAdmin(BaseUserAdmin):
     search_fields = ('username', 'email', 'full_name', 'birth_date')
     ordering = ('username',)
 
-admin.site.unregister(User)
-admin.site.register(User, UserAdmin)
-
+# Desregistrar el modelo User (si lo estás usando) y registrar CustomUser
+#admin.site.unregister(User)  # Asegúrate de que realmente necesites esto
+admin.site.register(CustomUser, UserAdmin)  # Cambia User por CustomUser
 #Registrar TASKS
 #admin.site.register(Task)
 

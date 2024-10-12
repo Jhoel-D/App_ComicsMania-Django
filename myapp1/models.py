@@ -1,5 +1,5 @@
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AbstractUser
 from django.contrib import admin #Para usar filtros en admin
 from django.db import models  # Importa models de Django
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -7,13 +7,19 @@ from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.utils import timezone
 
+class CustomUser(AbstractUser):
+    birth_date = models.DateField(null=True, blank=True)
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}"
+
 class Task(models.Model):
     title = models.CharField(max_length=100)
     descripction = models.TextField(blank = True)
     created = models.DateTimeField(auto_now_add=True)
     datecompleted = models.DateTimeField(null=True, blank=True)
     important = models.BooleanField(default=False)
-    User = models.ForeignKey(User, on_delete=models.CASCADE)
+    User = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     def __str__(self):
         return self.title + ' - by '+ self.User.username
     
@@ -88,13 +94,13 @@ class PaymentMethods(models.Model): #Method de Page
         return self.description if self.description else "No description available"
 
 class CartItem(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     comic = models.ForeignKey(ComicsMangas, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
     added_at = models.DateTimeField(auto_now_add=True)
 
 class ItemsOrder(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     comic = models.ForeignKey(ComicsMangas, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
     added_at = models.DateTimeField(auto_now_add=True)
@@ -137,7 +143,7 @@ class Order(models.Model):
         ('PD', 'Pando'),
         ('El Alto', 'El Alto'),
     ]
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     items = models.ManyToManyField(ItemsOrder, related_name='orders', blank=True)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     shipping_address = models.CharField(max_length=255)
@@ -174,7 +180,7 @@ def delete_items_order(sender, instance, **kwargs):
 
 
 class Comments(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True)
     product = models.ForeignKey(ComicsMangas, on_delete=models.CASCADE, null=True)
     review_comment = models.TextField(blank=True)
     publication_date = models.DateTimeField(auto_now_add=True)
@@ -184,7 +190,7 @@ class Comments(models.Model):
         return f"Comment by {self.user.username} on {self.product.title}"
 
 class Rating(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     product = models.ForeignKey(ComicsMangas, on_delete=models.CASCADE)
     value = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])
     publication_date = models.DateTimeField(auto_now_add=True)
@@ -193,7 +199,7 @@ class Rating(models.Model):
         return f"Rating: {self.value} stars by {self.user.username} for '{self.product.title}'"
     
 class Sales(models.Model): #Ventas 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True)
     sales_date = models.DateTimeField(null=True)
     total_price = models.IntegerField(null=True)
     

@@ -26,6 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 #
 ####AUTH_USER_MODEL = 'myapp1.CustomUser'
+AUTH_USER_MODEL = 'myapp1.CustomUser'  
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
@@ -104,7 +105,8 @@ DATABASES = {
             'default': dj_database_url.config(
             # Replace this value with your local database's connection string.
                 #default='postgresql://postgres:postgres@localhost:5432/mysite',
-                default='mysql://root:@localhost:3308/base_datos_comicsmania',
+                #default='mysql://root:@localhost:3308/base_datos_comicsmania',
+                default='mysql://root:@localhost:3308/deploy_bd_comicsmania',
                 conn_max_age=600
                 )
         }

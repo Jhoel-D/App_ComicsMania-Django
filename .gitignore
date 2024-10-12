@@ -1,4 +1,6 @@
 db.sqlite3
+import_users.py
+
 
 
 
@@ -17,5 +19,8 @@ ModuloRecom
 .vscode
 __pycache__
 export
+
+user2.csv
+create_test_users.py
 
 
