@@ -26,7 +26,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),    
     path('', include('myapp1.urls')),
     #path('comics_mangas_web/', include('myapp1.urls')),
-    path('api/', include('myapp1.urls2')),
+    #path('api/', include('myapp1.urls2')),
     
 ]
 
