@@ -350,14 +350,14 @@ def get_cart_total(request):
 # Vista para el formulario de registro
 def signup_new(request):
     if request.method == 'POST':
-        form = CustomUserCreationForm(request.POST)
+        form = CustomUserCreationForm(request.POST)  # Crea una instancia del formulario con los datos del POST
         if form.is_valid():  # Verifica si el formulario es válido
             try:
                 user = form.save()  # Guarda el usuario, maneja automáticamente las contraseñas
                 login(request, user)  # Inicia sesión al usuario
                 return redirect('signin_new')  # Redirige a la vista de inicio de sesión
             except IntegrityError:
-                return render(request, 'signup_new.html', {'form': form, 'error': 'User already exists'})
+                return render(request, 'signup_new.html', {'form': form, 'error': 'El usuario ya existe'})
         else:
             return render(request, 'signup_new.html', {'form': form, 'error': 'Error en el formulario'})
     else:
@@ -380,18 +380,19 @@ def signin_new(request):
         form = AuthenticationForm()  # Crea una instancia vacía del formulario
     return render(request, 'signin_new.html', {'form': form})  # Renderiza la plantilla de inicio de sesión
 # Login de formulario
-def signup(request): 
+def signup(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)  # Crea una instancia del formulario con datos del usuario
         if form.is_valid():  # Verifica si el formulario es válido
             try:
                 user = form.save()  # Guarda el usuario (esto ya maneja las contraseñas)
                 login(request, user)  # Inicia sesión al nuevo usuario
+                messages.success(request, "¡Registro exitoso! Bienvenido.")  # Mensaje de éxito
                 return redirect('tasks')  # Redirige a la vista de tareas
             except IntegrityError:
                 return render(request, 'signup.html', {
                     'form': form,
-                    'error': 'User already exists'
+                    'error': 'El usuario ya existe'
                 })
         else:
             return render(request, 'signup.html', {

@@ -1,114 +1,125 @@
-{% extends 'layouts/base.html' %} 
-
+{% extends 'layouts/base.html' %}
 
 {% block content %}
-
 <main class="container">
     <div class="row">
         <div class="col-md-4 offset-md-4 mt-5">
-            <form action="/signup/" method="POST" class="card card-body">
-                <h1 class="text-center">Signup</h1>
-
-               <!-- 
-                 {% if errors %}
-                <div class="alert alert-danger">
-                    <ul>
-                        {% for error in errors %}
-                            <li>{{ error }}</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-                {% endif %}
-                -->
+            <form action="{% url 'signup' %}" method="POST" class="card card-body">
+                <h1 class="text-center">Registro</h1>
+                
                 {% csrf_token %}
-                <!-- Crear Formulario Login -->
+                
+                <!-- Mensaje de error global -->
+                {% if error %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                {% endif %}
+
+                <!-- Errores de validación -->
+                {% if errors %}
+                    <div class="alert alert-danger">
+                        <ul>
+                            {% for error in errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+                
                 <div class="mb-3">
-                    <label for="username">
-                    <input type="text" name="username" id="username" class="form-control" placeholder="Write your username">
-                    <!-- Error en username -->
+                    <label for="username">Nombre de usuario:</label>
+                    <input type="text" name="username" id="username" class="form-control" placeholder="Escribe tu nombre de usuario">
                     {% if errors.username %}
-                    <div class="text-danger">
-                        {% for error in errors.username %}
-                            <small>{{ error }}</small><br>
-                        {% endfor %}
-                   </div>
+                        <div class="text-danger">
+                            {% for error in errors.username %}
+                                <small>{{ error }}</small><br>
+                            {% endfor %}
+                        </div>
                     {% endif %}
                 </div>
 
                 <div class="mb-3">
-                    <label for="full_name">Full Name:</label>
-                    <input type="text" name="full_name" id="full_name" class="form-control" placeholder="Enter your full name">
-                    <!-- Error fullname -->
-                    {% if errors.full_name %}
-                    <div class="text-danger">
-                        {% for error in errors.full_name %}
-                          <small>{{ error }}</small><br>
-                        {% endfor %}
-                    </div>
-                     {% endif %}
+                    <label for="first_name">Nombre:</label>
+                    <input type="text" name="first_name" id="first_name" class="form-control" placeholder="Escribe tu nombre">
+                    {% if errors.first_name %}
+                        <div class="text-danger">
+                            {% for error in errors.first_name %}
+                                <small>{{ error }}</small><br>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
 
                 <div class="mb-3">
-                    <label for="email">Email:</label>
-                    <input type="email" name="email" id="email" class="form-control" placeholder="Enter your email address">
+                    <label for="last_name">Apellido:</label>
+                    <input type="text" name="last_name" id="last_name" class="form-control" placeholder="Escribe tu apellido">
+                    {% if errors.last_name %}
+                        <div class="text-danger">
+                            {% for error in errors.last_name %}
+                                <small>{{ error }}</small><br>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    <label for="email">Correo electrónico:</label>
+                    <input type="email" name="email" id="email" class="form-control" placeholder="Escribe tu correo electrónico">
                     {% if errors.email %}
-                    <div class="text-danger">
-                        {% for error in errors.email %}
-                          <small>{{ error }}</small><br>
-                        {% endfor %}
-                    </div>
-                     {% endif %}
+                        <div class="text-danger">
+                            {% for error in errors.email %}
+                                <small>{{ error }}</small><br>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
 
                 <div class="mb-3">
-                    <label for="password">
-                        Password: 
-                    </label>
-                    <input type="password" name="password1" id="password1" class="form-control" placeholder="Write your password">
+                    <label for="password1">Contraseña:</label>
+                    <input type="password" name="password1" id="password1" class="form-control" placeholder="Escribe tu contraseña">
                     {% if errors.password1 %}
-                    <div class="text-danger">
-                        {% for error in errors.password1 %}
-                          <small>{{ error }}</small><br>
-                        {% endfor %}
-                    </div>
-                     {% endif %}
+                        <div class="text-danger">
+                            {% for error in errors.password1 %}
+                                <small>{{ error }}</small><br>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
 
                 <div class="mb-3">
-                    <label for="password2">
-                        Confirm your password: 
-                    </label>
-                    <input type="password" name="password2" id="password2" class="form-control" placeholder="Confirm your password">
+                    <label for="password2">Confirmar contraseña:</label>
+                    <input type="password" name="password2" id="password2" class="form-control" placeholder="Confirma tu contraseña">
                     {% if errors.password2 %}
-                    <div class="text-danger">
-                        {% for error in errors.password2 %}
-                          <small>{{ error }}</small><br>
-                        {% endfor %}
-                    </div>
-                     {% endif %}
+                        <div class="text-danger">
+                            {% for error in errors.password2 %}
+                                <small>{{ error }}</small><br>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
 
                 <div class="mb-3">
-                    <label for="birth_date">Birth Date:</label>
+                    <label for="birth_date">Fecha de nacimiento:</label>
                     <input type="date" name="birth_date" id="birth_date" class="form-control">
-                    {% if errors.birth_date%}
-                    <div class="text-danger">
-                        {% for error in errors.birth_date %}
-                          <small>{{ error }}</small><br>
-                        {% endfor %}
-                    </div>
-                     {% endif %}
+                    {% if errors.birth_date %}
+                        <div class="text-danger">
+                            {% for error in errors.birth_date %}
+                                <small>{{ error }}</small><br>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
-                <button class="btn btn-primary">
-                    Signup
+
+                <button class="btn btn-primary" type="submit">
+                    Registrarse
                 </button>
             </form>
-            <!-- Validaciones extra, usario exsistente, contraseñas no iguales etc-->
+
+            <!-- Mensajes de éxito -->
             {% if messages %}
                 {% for message in messages %}
-                 <div class="alert alert-success" role="alert">
-                    {{ message }}
-                 </div>
+                    <div class="alert alert-success" role="alert">
+                        {{ message }}
+                    </div>
                 {% endfor %}
             {% endif %}
         </div>

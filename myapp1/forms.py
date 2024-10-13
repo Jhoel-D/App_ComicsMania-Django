@@ -8,11 +8,12 @@ class CustomUserCreationForm(forms.ModelForm):
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
     password2 = forms.CharField(label='Password confirmation', widget=forms.PasswordInput)
     birth_date = forms.DateField(label='Fecha de nacimiento', widget=forms.DateInput(attrs={'type': 'date'}))
-    full_name = forms.CharField(max_length=150, label='Full Name')
+    first_name = forms.CharField(max_length=150, label='Nombre', required=True)
+    last_name = forms.CharField(max_length=150, label='Apellido', required=True)
 
     class Meta:
         model = User
-        fields = ['username', 'full_name', 'email', 'password1', 'password2', 'birth_date']
+        fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2', 'birth_date']
 
     def clean_password2(self):
         password1 = self.cleaned_data.get("password1")
@@ -24,12 +25,12 @@ class CustomUserCreationForm(forms.ModelForm):
     def save(self, commit=True):
         user = super().save(commit=False)
         user.set_password(self.cleaned_data["password1"])
-        user.full_name = self.cleaned_data["full_name"]
+        user.first_name = self.cleaned_data["first_name"]
+        user.last_name = self.cleaned_data["last_name"]
         user.birth_date = self.cleaned_data["birth_date"]
         if commit:
             user.save()
         return user
-    
 class TaskForm (forms.ModelForm):
     class Meta:
         model = Task
