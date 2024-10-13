@@ -16,8 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+#
+from django.conf.urls.static import static
 #from myapp1 import views
 #from ShoppingCartApp import views
+from django.conf import settings
 
 from myapp1 import views as myapp1_views
 
@@ -29,4 +32,6 @@ urlpatterns = [
     #path('api/', include('myapp1.urls2')),
     
 ]
-
+# Solo si estás en modo DEBUG
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -7,6 +7,7 @@ from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.utils import timezone
 
+
 class CustomUser(AbstractUser):
     birth_date = models.DateField(null=True, blank=True)
     @property
@@ -58,8 +59,9 @@ class Categories(models.Model): #Categories
 class Author(models.Model):  # Autores
     name = models.CharField(max_length=100)
     def __str__(self):
-        return self.name
-
+        return self.name#Cloud
+    
+from cloudinary.models import CloudinaryField
 class ComicsMangas(models.Model): #Comics Manga
     title = models.CharField(max_length=250, verbose_name="Title")
     publisher = models.ForeignKey(Publisher, on_delete=models.CASCADE)

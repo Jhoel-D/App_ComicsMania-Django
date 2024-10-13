@@ -17,6 +17,7 @@ import os
 import dj_database_url
 
 
+
 PAYPAL_CLIENT_ID = 'ASN1mNwEDNB287Si0Ock9BSi8KWcMOk0ileCfImWBlekUoZGbgx0dcRt6LtJqtjlJeS2vXufxHVkAYIT'
 PAYPAL_CLIENT_SECRET = 'ENF4eES4A347ydyn5OTq3RS2JLBxY4auPzhVdf5MVbRHKCphOYbXBAUM1uHMz1Vw8bYPN4r4YiBEVAWl'
 PAYPAL_MODE = 'sandbox'  # Cambiar a 'live' en producción
@@ -25,7 +26,13 @@ PAYPAL_MODE = 'sandbox'  # Cambiar a 'live' en producción
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 #
-####AUTH_USER_MODEL = 'myapp1.CustomUser'
+# Cloudynary imports
+import cloudinary
+import cloudinary_storage
+#import cloudinary.uploader
+#import cloudinary.api
+
+
 AUTH_USER_MODEL = 'myapp1.CustomUser'  
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -55,7 +62,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'myapp1',
     'paypalcheckoutsdk',
-    'rest_framework'
+    'rest_framework',
+    'cloudinary',
+    'cloudinary_storage',
 ]
 
 MIDDLEWARE = [
@@ -176,9 +185,22 @@ LOGIN_URL = '/signin'
 # MEDIA_ROOT = os.path.join(BASE_DIR, "")
 # MEDIA_URl = '/images/'
 # Define el directorio donde se almacenarán las imágenes subidas
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Asegúrate de que el directorio 'media' exista
+#MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Asegúrate de que el directorio 'media' exista
 
 # Define la URL para acceder a los archivos de medios
 MEDIA_URL = '/media/'  # Esta URL se usará para acceder a las imágenes
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+#Cloudinary integracion - Django
+
+# cloudinary.config(
+#     cloud_name = "jkmcloud",
+#     api_key = "685839427689675",
+#     api_secret = "eRzfnlzCS5xKEH3iy8HOo4GExjQ"
+# )
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'dulli26n4',
+    'API_KEY': '685839427689675',
+    'API_SECRET': 'eRzfnlzCS5xKEH3iy8HOo4GExjQ',
+}

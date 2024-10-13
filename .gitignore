@@ -1,25 +1,19 @@
+media
 db.sqlite3
 import_users.py
-
-
-
-
 api.py
 serializers.py
 urls2.py
-
 recommender.py
 steam-200k.csv
 u2.data
 Comic_Manga.csv
 create_test_users.py
-
 ModuloRecom
 .venv
 .vscode
 __pycache__
 export
-
 user2.csv
 create_test_users.py
 
