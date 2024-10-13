@@ -94,22 +94,28 @@ WSGI_APPLICATION = 'ProyComicsmania.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+# DATABASES = {
+#         # 'default': {
+#             # 'ENGINE': 'django.db.backends.mysql',
+#             # 'NAME': 'base_datos_comicsmania',
+#             # 'USER': 'root',
+#             # 'PASSWORD': '',
+#             # 'HOST': 'localhost',
+#             # 'PORT': '3308',
+#             'default': dj_database_url.config(
+#             # Replace this value with your local database's connection string.
+#                 #default='postgresql://postgres:postgres@localhost:5432/mysite',
+#                 #default='mysql://root:@localhost:3308/base_datos_comicsmania',
+#                 # default='mysql://root:@localhost:3308/deploy_bd_comicsmania',
+#                 # conn_max_age=600
+#                 )
+#         }
 DATABASES = {
-        # 'default': {
-            # 'ENGINE': 'django.db.backends.mysql',
-            # 'NAME': 'base_datos_comicsmania',
-            # 'USER': 'root',
-            # 'PASSWORD': '',
-            # 'HOST': 'localhost',
-            # 'PORT': '3308',
-            'default': dj_database_url.config(
-            # Replace this value with your local database's connection string.
-                #default='postgresql://postgres:postgres@localhost:5432/mysite',
-                #default='mysql://root:@localhost:3308/base_datos_comicsmania',
-                default='mysql://root:@localhost:3308/deploy_bd_comicsmania',
-                conn_max_age=600
-                )
-        }
+    'default': dj_database_url.config(
+        default='postgresql://bdcomicsmania_user:7XnKqWhSWfyk7LlaD6lnvI7EVaIPlFaL@dpg-cs52p8i3esus73ao7qjg-a.oregon-postgres.render.com/bdcomicsmania',
+        conn_max_age=600
+    )
+}
 # Asegúrate de que el motor de base de datos esté correctamente definido
 #DATABASES['default']['ENGINE'] = 'django.db.backends.mysql'
 
