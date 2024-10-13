@@ -72,5 +72,8 @@ urlpatterns = [
     
     #path('payment_confirmation/<int:order_id>/', views.payment_confirmation, name='payment_confirmation'),
     
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+ ] #+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Sirve archivos de medios en modo DEBUG
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

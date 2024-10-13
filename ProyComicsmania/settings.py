@@ -167,7 +167,12 @@ LOGIN_URL = '/signin'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 #For IMG
-MEDIA_ROOT = os.path.join(BASE_DIR, "")
-MEDIA_URl = '/images/'
+# MEDIA_ROOT = os.path.join(BASE_DIR, "")
+# MEDIA_URl = '/images/'
+# Define el directorio donde se almacenarán las imágenes subidas
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Asegúrate de que el directorio 'media' exista
+
+# Define la URL para acceder a los archivos de medios
+MEDIA_URL = '/media/'  # Esta URL se usará para acceder a las imágenes
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
