@@ -115,8 +115,8 @@ WSGI_APPLICATION = 'ProyComicsmania.wsgi.application'
 #             # Replace this value with your local database's connection string.
 #                 #default='postgresql://postgres:postgres@localhost:5432/mysite',
 #                 #default='mysql://root:@localhost:3308/base_datos_comicsmania',
-#                 # default='mysql://root:@localhost:3308/deploy_bd_comicsmania',
-#                 # conn_max_age=600
+#                 default='mysql://root:@localhost:3308/deploy_bd_comicsmania',
+#                 conn_max_age=600
 #                 )
 #         }
 DATABASES = {

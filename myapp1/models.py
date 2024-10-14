@@ -10,10 +10,6 @@ from django.utils import timezone
 
 class CustomUser(AbstractUser):
     birth_date = models.DateField(null=True, blank=True)
-    @property
-    def full_name(self):
-        return f"{self.first_name} {self.last_name}"
-
 class Task(models.Model):
     title = models.CharField(max_length=100)
     descripction = models.TextField(blank = True)

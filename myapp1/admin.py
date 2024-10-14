@@ -11,12 +11,12 @@ admin.site.site_title = "Fantasy ComicsMania" #Poner Nombre de la página
 class UserAdmin(BaseUserAdmin):
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
-        ('Personal info', {'fields': ('email', 'full_name', 'birth_date')}),
+        ('Personal info', {'fields': ('email', 'first_name', 'last_name', 'birth_date')}),
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
-    list_display = ('username', 'email', 'full_name', 'birth_date', 'is_staff')
-    search_fields = ('username', 'email', 'full_name', 'birth_date')
+    list_display = ('username', 'email', 'first_name', 'last_name', 'birth_date', 'is_staff')
+    search_fields = ('username', 'email', 'fist_name', 'last_name', 'birth_date')
     ordering = ('username',)
 
 # Desregistrar el modelo User (si lo estás usando) y registrar CustomUser
